@@ -1,0 +1,115 @@
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: aws-sns
+  labels:
+    sensu.io/workflow: sensu_flow
+spec:
+  command: sensu-aws-sns-handler
+  env_vars: null
+  filters:
+    - is_incident
+    - not_silenced
+  handlers: null
+  runtime_assets:
+    - nixwiz/sensu-aws-sns-handler:0.1.0
+  secrets:
+    - name: AWS_SECRET_ACCESS_KEY
+      secret: aws_secret_access_key
+    - name: AWS_ACCESS_KEY_ID
+      secret: aws_access_key_id
+    - name: AWS_REGION
+      secret: aws_region
+    - name: SNS_TOPIC_ARN
+      secret: sns_topic_arn
+  timeout: 0
+  type: pipe
+---
+type: Secret
+api_version: secrets/v1
+metadata:
+  name: aws_secret_access_key
+  labels:
+    sensu.io/workflow: sensu_flow
+spec:
+  provider: env
+  id: AWS_SECRET_ACCESS_KEY
+---
+type: Secret
+api_version: secrets/v1
+metadata:
+  name: aws_access_key_id
+  labels:
+    sensu.io/workflow: sensu_flow
+spec:
+  provider: env
+  id: AWS_ACCESS_KEY_ID
+---
+type: Secret
+api_version: secrets/v1
+metadata:
+  name: aws_region
+  labels:
+    sensu.io/workflow: sensu_flow
+spec:
+  provider: env
+  id: AWS_REGION
+---
+type: Secret
+api_version: secrets/v1
+metadata:
+  name: sns_topic_arn
+  labels:
+    sensu.io/workflow: sensu_flow
+spec:
+  provider: env
+  id: SNS_TOPIC_ARN
+---
+type: Asset
+api_version: core/v2
+metadata:
+  name: sensu-aws-sns-handler:0.1.0
+  labels:
+    sensu.io/workflow: sensu_flow
+  annotations:
+    io.sensu.bonsai.url: https://bonsai.sensu.io/assets/nixwiz/sensu-aws-sns-handler
+    io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/nixwiz/sensu-aws-sns-handler
+    io.sensu.bonsai.tier: Community
+    io.sensu.bonsai.version: 0.1.0
+    io.sensu.bonsai.namespace: nixwiz
+    io.sensu.bonsai.name: sensu-aws-sns-handler
+    io.sensu.bonsai.tags: aws, handler
+spec:
+  builds:
+    - url: https://assets.bonsai.sensu.io/304d4c058bcd8b07f436f2187e946b1588602579/sensu-aws-sns-handler_0.1.0_windows_amd64.tar.gz
+      sha512: b8928b5b72dfdb3cef15d307fc4849aea4ad432e6f541b9e744f3d7b3c6cdf3dd85710708215e3f65c8d98a5612d9f238bac6974173767c41543f40a70f4a21f
+      filters:
+        - entity.system.os == 'windows'
+        - entity.system.arch == 'amd64'
+    - url: https://assets.bonsai.sensu.io/304d4c058bcd8b07f436f2187e946b1588602579/sensu-aws-sns-handler_0.1.0_darwin_amd64.tar.gz
+      sha512: e42ff50429bfd8067f4eb1ffe2d3ac228e4301952cf4221f2b740c31ebcdd0b1a031968a334091d08afdbf4c95c87056d53c7a5429b537d74a9b6d3ef99c187e
+      filters:
+        - entity.system.os == 'darwin'
+        - entity.system.arch == 'amd64'
+    - url: https://assets.bonsai.sensu.io/304d4c058bcd8b07f436f2187e946b1588602579/sensu-aws-sns-handler_0.1.0_linux_armv7.tar.gz
+      sha512: 1052a0e55f7e0918fb8145b8a17908cdbe29b7a9dc44d1db3ec31ddfc021ba212f682dd9a82caf743ca955ad63c6df14e0461658235d7310c86a2848d4a8d5a7
+      filters:
+        - entity.system.os == 'linux'
+        - entity.system.arch == 'armv7'
+    - url: https://assets.bonsai.sensu.io/304d4c058bcd8b07f436f2187e946b1588602579/sensu-aws-sns-handler_0.1.0_linux_arm64.tar.gz
+      sha512: 762c74c258987db0a5fcdbbc855d37c408a29e54ff85bc3d0e4e6c68900f18e43a2289da83a0d1b5794e35c4d19d6dd0d28e6ebeac30326de9f8ce7ffdcb8f1c
+      filters:
+        - entity.system.os == 'linux'
+        - entity.system.arch == 'arm64'
+    - url: https://assets.bonsai.sensu.io/304d4c058bcd8b07f436f2187e946b1588602579/sensu-aws-sns-handler_0.1.0_linux_386.tar.gz
+      sha512: 195ca1414307b09b76a54fb91daf3e83ff561082e9e34d05900b12ec0b4564a30b15a5b1a120620813a7b7a216a3b4bafb15beb43a1561ff4a2303c0bdff4905
+      filters:
+        - entity.system.os == 'linux'
+        - entity.system.arch == '386'
+    - url: https://assets.bonsai.sensu.io/304d4c058bcd8b07f436f2187e946b1588602579/sensu-aws-sns-handler_0.1.0_linux_amd64.tar.gz
+      sha512: '06391d9ec7317bf7b2f3b87507eccd683650f08440944a1fda73b1e46ed8c1cb9bd229ffcf836ee176a1f0fba52a6cbfa34fd301cf457c37d4762ad72d4a2283'
+      filters:
+        - entity.system.os == 'linux'
+        - entity.system.arch == 'amd64'
+
