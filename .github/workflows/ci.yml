@@ -25,7 +25,7 @@ jobs:
           SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD: ${{ secrets.SENSU_PASSWORD }}
         ports:
           - 8080:8080
-        options: --entrypoint sensu-backend start
+        options: --entrypoint "sensu-backend start"
 
             
     # Steps represent a sequence of tasks that will be executed as part of the job
