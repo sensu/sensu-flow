@@ -2,6 +2,7 @@
 preflight_check=0
 WORKFLOW_LABEL_SELECTOR="sensu.io/workflow == sensu_flow"
 MANAGED_RESOURCES="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"
+NAMESPACES_DIR="namespaces"
 
 echo "Working Directory: $PWD"
 if [ -f  ./.env ] ; then
@@ -14,6 +15,7 @@ fi
 
 [ -z "$WORKFLOW_LABEL_SELECTOR" ] && [ -z "$INPUT_WORKFLOW_LABEL_SELECTOR" ] && echo "WORKFLOW_LABEL_SELECTOR environment variable empty" && preflight_check=1
 [ -z "$MANAGED_RESOURCES" ] && [ -z "$INPUT_MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
+[ -z "$NAMESPACES_DIR" ] && [ -z "$INPUT_NAMESPACES_DIR" ] && echo "NAMESPACES_DIE environment variable empty" && preflight_check=1
 
 if test $preflight_check -ne 0 ; then
 	echo "Missing environment variables"
@@ -64,6 +66,11 @@ if [ -z "$INPUT_MANAGED_RESOURCES" ] ; then
 else
         label_selector=$INPUT_MANAGED_RESOURCES
 fi
+if [ -z "$INPUT_NAMESPACES_DIR" ] ; then
+	managed__resources=$NAMESPACES_DIR
+else
+        label_selector=$INPUT_NAMESPACES_DIR
+fi
 
 if [ -z "$ca_file" ] ; then
 	touch /tmp/sensu_ca.pem  
@@ -113,7 +120,7 @@ then
   sensuctl create -f namespaces.yaml
 fi
 
-cd namespaces || die "Failed to cd to namespaces directory!"
+cd $NAMESPACES_DIR || die "Failed to cd to namespaces directory!"
 
 for namespace in $(ls -1)
 do
