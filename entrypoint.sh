@@ -11,7 +11,6 @@ fi
 [ -z "$SENSU_USER" ] && [ -z "$INPUT_SENSU_USER" ] && echo "SENSU_USER environment variable empty" && preflight_check=1
 [ -z "$SENSU_PASSWORD" ] && [ -z "$INPUT_SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
 [ -z "$SENSU_BACKEND_URL" ] && [ -z "$INPUT_SENSU_BACKEND_URL" ] && echo "SENSU_BACKEND_URL environment variable empty" && preflight_check=1
-[ -z "$SENSU_COMMAND" ] && [ -z "$INPUT_SENSU_COMMAND" ] && echo "SENSU_COMMAND environment variable empty" && preflight_check=1
 
 [ -z "$WORKFLOW_LABEL_SELECTOR" ] && [ -z "$INPUT_WORKFLOW_LABEL_SELECTOR" ] && echo "WORKFLOW_LABEL_SELECTOR environment variable empty" && preflight_check=1
 [ -z "$MANAGED_RESOURCES" ] && [ -z "$INPUT_MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
@@ -87,6 +86,8 @@ if test $retval -ne 0; then
 	echo "sensuctl configure failed"
 	exit $retval
 fi
+echo "Current Directory:"
+pwd
 
 echo "Executing Sensuflow"
 # Functions
