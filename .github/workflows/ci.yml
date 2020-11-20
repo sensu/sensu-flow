@@ -16,18 +16,6 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Setup a sensu-backend service
-    services:
-      sensu-backend:
-        image: sensu/sensu:latest
-        env: 
-          SENSU_BACKEND_CLUSTER_ADMIN_USERNAME: ${{ secrets.SENSU_USER }}
-          SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD: ${{ secrets.SENSU_PASSWORD }}
-        ports:
-          - 8080:8080
-        options: --entrypoint "sensu-backend start"
-
-            
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -38,7 +26,7 @@ jobs:
       uses: ./
       id: sensuflow
       with:
-        sensu_backend_url: http://localhost:8080
+        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
 
