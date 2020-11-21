@@ -3,7 +3,7 @@ preflight_check=0
 WORKFLOW_LABEL_SELECTOR="sensu.io/workflow == sensu_flow"
 MANAGED_RESOURCES="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"
 NAMESPACES_DIR="namespaces"
-
+JSON_DIR="/tmp/json"
 echo "Working Directory: $PWD"
 if [ -f  ./.env ] ; then
   source ./.env
@@ -117,7 +117,9 @@ function is_namespace {
 # First, make sure we have our namespaces
 if test -f namespaces.yaml
 then
-  sensuctl create -f namespaces.yaml
+	yq v namespaces.yaml || die "namespaces.yaml is not valid yaml"
+
+	sensuctl create -f namespaces.yaml 
 fi
 
 cd $namespaces_dir || die "Failed to cd to namespaces directory!"
@@ -140,6 +142,7 @@ do
      echo "Directory ${namespace} exists in namespaces/ but is not a defined namespace in sensu, skipping"
      continue
   fi
+
 
   echo "Namespace ${namespace}"
   echo -e "Pruning resources...\c"
