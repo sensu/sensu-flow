@@ -62,14 +62,14 @@ else
 fi
 
 if [ -z "$INPUT_MANAGED_RESOURCES" ] ; then
-	managed__resources=$MANAGED_RESOURCES
+	managed_resources=$MANAGED_RESOURCES
 else
-        label_selector=$INPUT_MANAGED_RESOURCES
+        managed_resources=$INPUT_MANAGED_RESOURCES
 fi
 if [ -z "$INPUT_NAMESPACES_DIR" ] ; then
-	managed__resources=$NAMESPACES_DIR
+	namespaces_dir=$NAMESPACES_DIR
 else
-        label_selector=$INPUT_NAMESPACES_DIR
+        namespaces_dir=$INPUT_NAMESPACES_DIR
 fi
 
 if [ -z "$ca_file" ] ; then
@@ -120,14 +120,15 @@ then
   sensuctl create -f namespaces.yaml
 fi
 
-cd $NAMESPACES_DIR || die "Failed to cd to namespaces directory!"
+cd $namespaces_dir || die "Failed to cd to namespaces directory!"
+echo "Namespaces Directory: $(pwd)"
 
 for namespace in $(ls -1)
 do
   # If not a directory of resources then skip
   if ! test -d ${namespace}
   then
-     echo "File ${namespace} exists in namespaces/, skipping"
+     echo "${namespace} in $namespaces_dir/ is not a directory, skipping"
      continue
   fi
 
@@ -136,7 +137,7 @@ do
      # Skip or die?
      # Skip means this may pass silently, die would cause bad exit
      # that should cause a build failure
-     echo "Directory ${namespace} exists in namespaces/ but is not a defined namespace, skipping"
+     echo "Directory ${namespace} exists in namespaces/ but is not a defined namespace in sensu, skipping"
      continue
   fi
 

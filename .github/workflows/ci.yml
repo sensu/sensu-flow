@@ -30,3 +30,14 @@ jobs:
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
 
+    - name: Sensuflow with optional settings
+      uses: ./
+      id: sensuflow
+      with:
+        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_user: ${{ secrets.SENSU_USER }}
+        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        namespaces_dir: ci-namespaces
+        workflow_label_selector: ci_flow
+
+
