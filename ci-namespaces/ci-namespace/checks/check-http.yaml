@@ -3,7 +3,7 @@ api_version: core/v2
 metadata:
   name: nginx
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   check_hooks: null
   command: check-http.rb -u http://localhost -q 'Welcome to CentOS'
@@ -41,7 +41,7 @@ metadata:
     io.sensu.bonsai.version: 6.0.0
   name: sensu-plugins/sensu-plugins-http:6.0.0
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   builds:
     - filters:
@@ -96,7 +96,7 @@ metadata:
     io.sensu.bonsai.version: 0.0.10
   name: sensu/sensu-ruby-runtime:0.0.10
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   builds:
     - filters:

@@ -3,7 +3,7 @@ api_version: core/v2
 metadata:
   name: pushover
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   command: sensu-go-pushover-handler --pushoverToken $PUSHOVER_TOKEN --pushoverUserKey $PUSHOVER_USERKEY
   env_vars: null
@@ -27,7 +27,7 @@ api_version: secrets/v1
 metadata:
   name: pushover_token
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   provider: env
   id: SENSU_PUSHOVER_TOKEN
@@ -37,7 +37,7 @@ api_version: secrets/v1
 metadata:
   name: pushover_userkey
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   provider: env
   id: SENSU_PUSHOVER_USERKEY
@@ -47,7 +47,7 @@ api_version: core/v2
 metadata:
   name: nixwiz/sensu-go-pushover-handler:0.8.0
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
   annotations:
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/nixwiz/sensu-go-pushover-handler
     io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/nixwiz/sensu-go-pushover-handler

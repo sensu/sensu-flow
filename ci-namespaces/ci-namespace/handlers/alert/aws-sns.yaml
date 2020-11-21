@@ -4,7 +4,7 @@ api_version: core/v2
 metadata:
   name: aws-sns
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   command: sensu-aws-sns-handler
   env_vars: null
@@ -31,7 +31,7 @@ api_version: secrets/v1
 metadata:
   name: aws_secret_access_key
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   provider: env
   id: AWS_SECRET_ACCESS_KEY
@@ -41,7 +41,7 @@ api_version: secrets/v1
 metadata:
   name: aws_access_key_id
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   provider: env
   id: AWS_ACCESS_KEY_ID
@@ -51,7 +51,7 @@ api_version: secrets/v1
 metadata:
   name: aws_region
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   provider: env
   id: AWS_REGION
@@ -61,7 +61,7 @@ api_version: secrets/v1
 metadata:
   name: sns_topic_arn
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
 spec:
   provider: env
   id: SNS_TOPIC_ARN
@@ -71,7 +71,7 @@ api_version: core/v2
 metadata:
   name: sensu-aws-sns-handler:0.1.0
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: ci_action 
   annotations:
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/nixwiz/sensu-aws-sns-handler
     io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/nixwiz/sensu-aws-sns-handler
