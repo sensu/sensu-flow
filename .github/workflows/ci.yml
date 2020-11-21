@@ -24,7 +24,7 @@ jobs:
 
     - name: Sensuflow with optional defaults
       uses: ./
-      id: sensuflow
+      id: defaults
       with:
         sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
@@ -32,7 +32,7 @@ jobs:
 
     - name: Sensuflow with optional settings
       uses: ./
-      id: sensuflow
+      id: options
       with:
         sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
