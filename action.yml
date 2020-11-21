@@ -1,6 +1,7 @@
 # action.yml
 name: 'Sensuflow'
-description: 'use sensuctl'
+description: 'Manage sensu resources using sensuctl\'s prune and delete commands"
+
 inputs:
   sensu_backend_url:
     description: 'The Sensu backend url (alt use env SENSU_BACKEND_URL'
