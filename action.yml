@@ -1,5 +1,5 @@
 # action.yml
-name: 'Sensuctl'
+name: 'Sensuflow'
 description: 'use sensuctl'
 inputs:
   sensu_backend_url:
