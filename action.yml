@@ -1,30 +1,24 @@
-name: "Sensuflow"
-description: "Manage sensu resources using sensuctl\'s prune and delete commands"
-author: "Jef Spaleta"
+# action.yml
+name: 'Sensuctl'
+description: 'use sensuctl'
 inputs:
-  sensu_backend_url:  
+  sensu_backend_url:  # id of input
     description: 'The Sensu backend url (alt use env SENSU_BACKEND_URL'
     required: true
-  sensu_user:  
+  sensu_user:  # id of input
     description: 'The Sensu user to auth (alt use env SENSU_USER'
     required: true
-  sensu_password:  
+  sensu_password:  # id of input
     description: 'The Sensu user password (alt use env SENSU_PASSWORD'
     required: true
+  sensu_command:
+    description: "sensuctl command to run"
+    required: true 
   configure_args:
-    description: "optional arguments to pass to sensuctl configure"
+    description: "optional arguments to pass to configure"
     required: false
-  sensu_ca:  
+  sensu_ca:  # id of input
     description: 'Optional Custom CA pem string'
-    required: false
-  namespaces_dir:
-    description: "Optional directory to process default: 'namespaces' "
-    required: false
-  workflow_label_selector:
-    description: "Option Sensu label selector, default: 'sensu.io/workflow == sensu_flow'"
-    required: false
-  managed_resources:
-    description: 'Optional comma seperated list of managed resources'
     required: false
 runs:
   using: 'docker'
@@ -32,4 +26,3 @@ runs:
 branding:
   color: green
   icon: alert-triangle
-
