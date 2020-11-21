@@ -1,6 +1,6 @@
 # Container image that runs your code
 FROM sensu/sensu:latest
-RUN echo '$MIRROR/alpine/v$VERSION/community' >> /etc/apk/repositories
+RUN echo 'http://nl.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
 RUN apk update
 RUN apk add jq yq
 
