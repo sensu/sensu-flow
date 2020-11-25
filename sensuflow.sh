@@ -1,6 +1,8 @@
 #!/bin/sh
 preflight_check=0
-WORKFLOW_LABEL_SELECTOR="sensu.io/workflow == sensu_flow"
+LABEL_SELECTOR="sensu.io/workflow"
+LABEL_MATCHING_CONDITION="== sensu_flow"
+DISABLE_SANITY_CHECKS=""
 MANAGED_RESOURCES="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"
 NAMESPACES_DIR="namespaces"
 JSON_DIR="/tmp/json"
@@ -13,7 +15,8 @@ fi
 [ -z "$SENSU_PASSWORD" ] && [ -z "$INPUT_SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
 [ -z "$SENSU_BACKEND_URL" ] && [ -z "$INPUT_SENSU_BACKEND_URL" ] && echo "SENSU_BACKEND_URL environment variable empty" && preflight_check=1
 
-[ -z "$WORKFLOW_LABEL_SELECTOR" ] && [ -z "$INPUT_WORKFLOW_LABEL_SELECTOR" ] && echo "WORKFLOW_LABEL_SELECTOR environment variable empty" && preflight_check=1
+[ -z "$LABEL_SELECTOR" ] && [ -z "$INPUT_LABEL_SELECTOR" ] && echo "LABEL_SELECTOR environment variable empty" && preflight_check=1
+[ -z "$LABEL_MATCHING_CONDITION" ] && [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] && echo "LABEL_MATCHING_CONDITION environment variable empty" && preflight_check=1
 [ -z "$MANAGED_RESOURCES" ] && [ -z "$INPUT_MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
 [ -z "$NAMESPACES_DIR" ] && [ -z "$INPUT_NAMESPACES_DIR" ] && echo "NAMESPACES_DIE environment variable empty" && preflight_check=1
 
@@ -55,11 +58,18 @@ else
 	ca_file=$INPUT_SENSU_CA
 fi
 
-if [ -z "$INPUT_WORKFLOW_LABEL_SELECTOR" ] ; then
-        label_selector=$WORKFLOW_LABEL_SELECTOR
+if [ -z "$INPUT_LABEL_SELECTOR" ] ; then
+        selector=$LABEL_SELECTOR
 else
-        label_selector=$INPUT_WORKFLOW_LABEL_SELECTOR
+        selector=$INPUT_LABEL_SELECTOR
 fi
+
+if [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] ; then
+        matching_condition=$LABEL_MATCHING_CONDITION
+else
+        matching_condition=$INPUT_LABEL_MATCHING_CONDITION
+fi
+label_selector=$selector+" "+$matching_condition
 
 if [ -z "$INPUT_MANAGED_RESOURCES" ] ; then
 	managed_resources=$MANAGED_RESOURCES
@@ -125,6 +135,7 @@ fi
 cd $namespaces_dir || die "Failed to cd to namespaces directory!"
 echo "Namespaces Directory: $(pwd)"
 
+echo "Label Selector: $(label_selector)"
 for namespace in $(ls -1)
 do
   # If not a directory of resources then skip
@@ -146,7 +157,7 @@ do
 
   echo "Namespace ${namespace}"
   echo -e "Pruning resources...\c"
-  NUM=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${WORKFLOW_LABEL_SELECTOR}" -r -f ${namespace} | jq '. | length')
+  NUM=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${label_selector}" -r -f ${namespace} | jq '. | length')
   echo "${NUM} resources deleted"
 
   echo -e "Creating/Updating resources...\c"
