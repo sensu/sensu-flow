@@ -20,7 +20,7 @@ inputs:
   namespaces_dir:
     description: "Optional directory to process default: 'namespaces' "
     required: false
-  label_selector:
+  required_label:
     description: "Option Sensu label selector, default: 'sensu.io/workflow'"
     required: false
   label_matching_condition:

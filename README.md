@@ -2,7 +2,7 @@
 Github Action for Sensu flow resource management pattern.
 
 ## Introduction
-This github action will allow you to manage Sensu resources for a namespaces by making use of sensuctl prune and create commands. The `sensu prune` command is scope by the action's `workflow_label_selector` and `managed_resources`settings. Please see the sensuctl command documentation for information.
+This github action will allow you to manage Sensu resources for a namespaces by making use of sensuctl prune and create commands. The `sensu prune` command is scope by the action's `required_label`, `label_matching_condition`, and `managed_resources`settings. Please see the sensuctl command documentation for information.
 
 In order to use this action, you'll need to define a Sensu user and associated role based access control.
 
@@ -29,7 +29,7 @@ namespaces
         └── check-status.yaml
 ```
 
-Using this example, this action would process the `test-namespace`, pruning the namespace resources according to `workflow_label_selector` and `managed_resources`settings
+Using this example, this action would process the `test-namespace`, pruning the namespace resources according to `required_label`, `label_matching_condition`,  and `managed_resources`settings
 
 ### Optionally Preparing namespaces
 If the `namespaces.yaml` file exists in the working directory (normally the top level of your repository) then this action will be used to create sensu namespaces before attempting to process the namespaces directory.
@@ -50,10 +50,14 @@ If the `namespaces.yaml` file exists in the working directory (normally the top 
     description: 'Optional Custom CA pem string'
 ####  namespaces_dir:
     description: "Optional directory to process default: 'namespaces' "
-####  workflow_label_selector:
-    description: "Option Sensu label selector, default: 'sensu.io/workflow == sensu_flow'"
+####  required_label:
+    description: "Option Sensu label selector, default: 'sensu.io/workflow'"
+####  label_matching_condition:
+    description: "Option Sensu label matching condition, default: '== sensu_flow'"
 ####  managed_resources:
     description: 'Optional comma seperated list of managed resources'
+####  disable_sanity_checks:
+    description: 'Optional boolean argument to to disable sanity checks  default: false'    
 
 ### Github Action Workflow Example
 ```
@@ -73,7 +77,8 @@ jobs:
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: namespaces
-        workflow_label_selector: "sensu.io/workflow == sensu_flow"
+        required_label: "sensu.io/workflow"
+        label_matching_condition: "== sensu_flow"
 
 ```
 ### RBAC Policy

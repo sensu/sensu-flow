@@ -1,6 +1,29 @@
 #!/bin/sh
+
+###
+# shell script to implement sensuflow
+## External dependancies:
+# sensuctl: https://sensu.io/downloads
+# yq: https://github.com/mikefarah/yq
+# jq: https://stedolan.github.io/jq/
+#
+## Required Environment Variables
+# SENSU_USER: sensu user for sensuctl configure
+# SENSU_PASSWORD: sensu password for sensuctl configure
+# SENSU_BACKEND_URL: sensu backend for sensuctl configure
+## Optional Environment Variables
+# SENSU_CA: CA certificate as a string
+# SENSU_CA_FILE: CA certificate file, if set overrides SENSU_CA
+# CONFIGURE_OPTIONS: Additional sensuctl configure options
+# NAMESPACES_DIR: directory holding sensuflow namepace subdirectories
+# MANAGED_RESOURCES: comma seperated list of resources
+# REQUIRED_LABEL: resource label required
+# LABEL_MATCHING_CONDITION: condition to match
+###
+
+### Defaults
 preflight_check=0
-LABEL_SELECTOR="sensu.io/workflow"
+REQUIRED_LABEL="sensu.io/workflow"
 LABEL_MATCHING_CONDITION="== sensu_flow"
 DISABLE_SANITY_CHECKS=""
 MANAGED_RESOURCES="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"
@@ -15,8 +38,9 @@ fi
 [ -z "$SENSU_PASSWORD" ] && [ -z "$INPUT_SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
 [ -z "$SENSU_BACKEND_URL" ] && [ -z "$INPUT_SENSU_BACKEND_URL" ] && echo "SENSU_BACKEND_URL environment variable empty" && preflight_check=1
 
-[ -z "$LABEL_SELECTOR" ] && [ -z "$INPUT_LABEL_SELECTOR" ] && echo "LABEL_SELECTOR environment variable empty" && preflight_check=1
+[ -z "$REQUIRED_LABEL" ] && [ -z "$INPUT_REQUIRED_LABEL" ] && echo "REQUIRED_LABEL environment variable empty" && preflight_check=1
 [ -z "$LABEL_MATCHING_CONDITION" ] && [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] && echo "LABEL_MATCHING_CONDITION environment variable empty" && preflight_check=1
+
 [ -z "$MANAGED_RESOURCES" ] && [ -z "$INPUT_MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
 [ -z "$NAMESPACES_DIR" ] && [ -z "$INPUT_NAMESPACES_DIR" ] && echo "NAMESPACES_DIE environment variable empty" && preflight_check=1
 
@@ -53,15 +77,15 @@ else
 	optional_args=$INPUT_CONFIGURE_ARGS
 fi
 if [ -z "$INPUT_SENSU_CA" ] ; then
-	ca_file=$SENSU_CA
+	ca_string=$SENSU_CA
 else
-	ca_file=$INPUT_SENSU_CA
+	ca_string=$INPUT_SENSU_CA
 fi
 
-if [ -z "$INPUT_LABEL_SELECTOR" ] ; then
-        selector=$LABEL_SELECTOR
+if [ -z "$INPUT_REQUIRED_LABEL" ] ; then
+        label=$REQUIRED_LABEL
 else
-        selector=$INPUT_LABEL_SELECTOR
+        label=$INPUT_REQUIRED_LABEL
 fi
 
 if [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] ; then
@@ -69,7 +93,7 @@ if [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] ; then
 else
         matching_condition=$INPUT_LABEL_MATCHING_CONDITION
 fi
-label_selector=$selector+" "+$matching_condition
+label_selector=${label}+" "+${matching_condition}
 
 if [ -z "$INPUT_MANAGED_RESOURCES" ] ; then
 	managed_resources=$MANAGED_RESOURCES
@@ -82,15 +106,16 @@ else
         namespaces_dir=$INPUT_NAMESPACES_DIR
 fi
 
-if [ -z "$ca_file" ] ; then
-	touch /tmp/sensu_ca.pem  
+if [ -z "$ca_string" ] ; then
+	touch /tmp/sensu_ca.pem
 else
-	echo $ca_file > /tmp/sensu_ca.pem  
+	echo $ca_string > /tmp/sensu_ca.pem  
 fi
+ca_file="/tmp/sensu_ca.pem"	
 
-if [ -s /tmp/sensu_ca.pem ]; then
+if [ -s $ca_file ]; then
         echo "custom CA file present"
-	ca_arg='--trusted-ca-file /tmp/sensu_ca.pem'
+	ca_arg="--trusted-ca-file ${ca_file}"
 else
  	ca_arg=''
 fi
@@ -107,6 +132,9 @@ echo "Current Directory:"
 pwd
 
 echo "Executing Sensuflow"
+echo "Required Label: $(label)"
+echo "Label Matching Condition: $(matching_condition)"
+echo "Label Selector: $(label_selector)"
 # Functions
 
 # Display error message and exit
@@ -135,7 +163,6 @@ fi
 cd $namespaces_dir || die "Failed to cd to namespaces directory!"
 echo "Namespaces Directory: $(pwd)"
 
-echo "Label Selector: $(label_selector)"
 for namespace in $(ls -1)
 do
   # If not a directory of resources then skip
