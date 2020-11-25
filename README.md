@@ -126,3 +126,6 @@ spec:
   groups: 
   - sensu_flow
 ```
+
+## Adapting to other CI/CD
+If you would like to adapt this for other CI/CD, the sensuflow.sh script from this repository should all you need. The script should be self-documenting with regard to needed executable dependancies and information concerning environment variables used.
