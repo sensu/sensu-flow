@@ -16,125 +16,93 @@
 # SENSU_CA_FILE: CA certificate file, if set overrides SENSU_CA
 # CONFIGURE_OPTIONS: Additional sensuctl configure options
 # NAMESPACES_DIR: directory holding sensuflow namepace subdirectories
+# NAMESPACES_FILE: file holding namespace resource definitions sensuflow action should create
 # MANAGED_RESOURCES: comma seperated list of resources
-# REQUIRED_LABEL: resource label required
-# LABEL_MATCHING_CONDITION: condition to match
-###
+# MATCHING_LABEL: resource label to match
+# MATCHING_CONDITION: condition to match
+# DISABLE_SANITY_CHECKS: if set disable sanity checks
 
-### Defaults
-preflight_check=0
-REQUIRED_LABEL="sensu.io/workflow"
-LABEL_MATCHING_CONDITION="== sensu_flow"
-DISABLE_SANITY_CHECKS=""
-MANAGED_RESOURCES="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"
-NAMESPACES_DIR="namespaces"
-JSON_DIR="/tmp/json"
-echo "Working Directory: $PWD"
+## Github Action Notes
+# Github Actions prefaces variables with INPUT_ 
+
+## Read in envvars from .env from current directory
 if [ -f  ./.env ] ; then
   source ./.env
 fi
 
-[ -z "$SENSU_USER" ] && [ -z "$INPUT_SENSU_USER" ] && echo "SENSU_USER environment variable empty" && preflight_check=1
-[ -z "$SENSU_PASSWORD" ] && [ -z "$INPUT_SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
-[ -z "$SENSU_BACKEND_URL" ] && [ -z "$INPUT_SENSU_BACKEND_URL" ] && echo "SENSU_BACKEND_URL environment variable empty" && preflight_check=1
+### Setup envvar values, including fallback defaults where needed
+: ${MATCHING_LABEL:=${INPUT_MATCHING_LABEL:="sensu.io/workflow"}}
+: ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== sensu_flow"}}
+: ${MANAGED_RESOURCES:=${INPUT_MANAGED_RESOURCES:="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"}}
+: ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:="namespaces"}}
+: ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:="namespaces.yaml"}}
+: ${DISABLE_SANITY_CHECKS:=${INPUT_DISABLE_SANITY_CHECKS:="false"}}
+: ${VERBOSE:=${INPUT_VERBOSE:=""}}
+: ${SENSU_USER:=${INPUT_SENSU_USER}}
+: ${SENSU_PASSWORD:=${INPUT_SENSU_PASSWORD}}
+: ${SENSU_BACKEND_URL:=${INPUT_SENSU_BACKEND_URL}}
+: ${CONFIGURE_ARGS:=${INPUT_CONFIGURE_ARGS}}
+: ${SENSU_CA_STRING:=${INPUT_SENSU_CA_STRING}}
+: ${SENSU_CA_FILE:=${INPUT_SENSU_CA_FILE}}
 
-[ -z "$REQUIRED_LABEL" ] && [ -z "$INPUT_REQUIRED_LABEL" ] && echo "REQUIRED_LABEL environment variable empty" && preflight_check=1
-[ -z "$LABEL_MATCHING_CONDITION" ] && [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] && echo "LABEL_MATCHING_CONDITION environment variable empty" && preflight_check=1
-
-[ -z "$MANAGED_RESOURCES" ] && [ -z "$INPUT_MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
-[ -z "$NAMESPACES_DIR" ] && [ -z "$INPUT_NAMESPACES_DIR" ] && echo "NAMESPACES_DIE environment variable empty" && preflight_check=1
+if [[ $VERBOSE ]]; then echo "Working Directory: $PWD"; fi
+# Check for required envvars to be defined
+preflight_check=0
+[ -z "$SENSU_USER" ] && echo "SENSU_USER environment variable empty" && preflight_check=1
+[ -z "$SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
+[ -z "$SENSU_BACKEND_URL" ] && echo "SENSU_BACKEND_URL environment variable empty" && preflight_check=1
+[ -z "$MATCHING_LABEL" ] && echo "MATCHING_LABEL environment variable empty" && preflight_check=1
+[ -z "$MATCHING_CONDITION" ] && echo "MATCHING_CONDITION environment variable empty" && preflight_check=1
+[ -z "$MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
+[ -z "$NAMESPACES_DIR" ]  && echo "NAMESPACES_DIE environment variable empty" && preflight_check=1
 
 if test $preflight_check -ne 0 ; then
 	echo "Missing environment variables"
 	exit 1
 else
-	echo "All needed environment variables are available"
+	if [[ $VERBOSE ]]; then echo "All needed environment variables are available"; fi
 fi
 
-if [ -z "$INPUT_SENSU_USER" ] ; then
-	username=$SENSU_USER
-else
-	username=$INPUT_SENSU_USER
-fi
-if [ -z "$INPUT_SENSU_PASSWORD" ] ; then
-	password=$SENSU_PASSWORD
-else
-	password=$INPUT_SENSU_PASSWORD
-fi
-if [ -z "$INPUT_SENSU_COMMAND" ] ; then
-	cmd=$SENSU_COMMAND
-else
-	cmd=$INPUT_SENSU_COMMAND
-fi
-if [ -z "$INPUT_SENSU_BACKEND_URL" ] ; then
-	url=$SENSU_BACKEND_URL
-else
-	url=$INPUT_SENSU_BACKEND_URL
-fi
-if [ -z "$INPUT_CONFIGURE_ARGS" ] ; then
-	optional_args=$CONFIGURE_ARGS
-else
-	optional_args=$INPUT_CONFIGURE_ARGS
-fi
-if [ -z "$INPUT_SENSU_CA" ] ; then
-	ca_string=$SENSU_CA
-else
-	ca_string=$INPUT_SENSU_CA
-fi
-
-if [ -z "$INPUT_REQUIRED_LABEL" ] ; then
-        label=$REQUIRED_LABEL
-else
-        label=$INPUT_REQUIRED_LABEL
-fi
-
-if [ -z "$INPUT_LABEL_MATCHING_CONDITION" ] ; then
-        matching_condition=$LABEL_MATCHING_CONDITION
-else
-        matching_condition=$INPUT_LABEL_MATCHING_CONDITION
-fi
-label_selector=${label}+" "+${matching_condition}
-
-if [ -z "$INPUT_MANAGED_RESOURCES" ] ; then
-	managed_resources=$MANAGED_RESOURCES
-else
-        managed_resources=$INPUT_MANAGED_RESOURCES
-fi
-if [ -z "$INPUT_NAMESPACES_DIR" ] ; then
-	namespaces_dir=$NAMESPACES_DIR
-else
-        namespaces_dir=$INPUT_NAMESPACES_DIR
-fi
-
-if [ -z "$ca_string" ] ; then
+LABEL_SELECTOR="${MATCHING_LABEL} ${MATCHING_CONDITION}"
+if [ -z "$SENSU_CA_STRING" ] ; then
 	touch /tmp/sensu_ca.pem
 else
-	echo $ca_string > /tmp/sensu_ca.pem  
+	echo $SENSU_CA_STRING > /tmp/sensu_ca.pem  
 fi
-ca_file="/tmp/sensu_ca.pem"	
+: ${SENSU_CA_FILE:="/tmp/sensu_ca.pem"}	
 
-if [ -s $ca_file ]; then
-        echo "custom CA file present"
-	ca_arg="--trusted-ca-file ${ca_file}"
+if [ -s $SENSU_CA_FILE ]; then
+        if [[ $VERBOSE ]]; then echo "custom CA file present"; fi
+	CA_ARG="--trusted-ca-file ${SENSU_CA_FILE}"
 else
- 	ca_arg=''
+ 	CA_ARG=''
 fi
 
-echo "Configuring sensuctl:"
-sensuctl configure -n --username ${username} --password ${password} --url ${url} ${ca_arg}  ${optional_args}
+if [ "$DISABLE_SANITY_CHECKS" = "false" ]; then
+	DISABLE_SANITY_CHECKS="" 
+fi
+if [ -z "$DISABLE_SANITY_CHECKS" ]; then
+	if [[ $VERBOSE ]]; then echo "sanity checks enabled"; fi
+else
+	if [[ $VERBOSE ]]; then echo "sanity checks disabled"; fi
+fi
+
+if [[ $VERBOSE ]]; then echo "Configuring sensuctl:"; fi
+sensuctl configure -n --username ${SENSU_USER} --password ${SENSU_PASSWORD} --url ${SENSU_BACKEND_URL} ${CA_ARG}  ${CONFIGURE_OPTIONS}
 retval=$?
 sensuctl config view
 if test $retval -ne 0; then
 	echo "sensuctl configure failed"
 	exit $retval
 fi
-echo "Current Directory:"
-pwd
-
-echo "Executing Sensuflow"
-echo "Required Label: $(label)"
-echo "Label Matching Condition: $(matching_condition)"
-echo "Label Selector: $(label_selector)"
+if [[ $VERBOSE ]]; then
+	echo "Current Directory:"
+	pwd
+	echo "Executing Sensuflow"
+	echo "Matching Label: ${MATCHING_LABEL}"
+	echo "Matching Condition: ${MATCHING_CONDITION}"
+	echo "Label Selector: ${LABEL_SELECTOR}"
+fi
 # Functions
 
 # Display error message and exit
@@ -150,27 +118,61 @@ function is_namespace {
   return $?
 }
 
+function lint_resource_metadata {
+  resource_dir=$1
+  required_label=$2
+  allowed_namespace=$3
+  if [[ $VERBOSE ]]; then echo "linting resource metadata in $resource_dir"; fi
+  yaml_files=$(find $resource_dir -name "*.y?ml")
+  for file in $yaml_files ; do
+    if [[ $required_label ]] ; then
+      items=($(yq read -d '*' $file 'metadata.name'))
+      labels=($(yq read -d '*' $file "metadata.labels(${required_label}"))
+      if [  ${#items[@]} -ne  ${#labels[@]} ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
+    fi
+    result=$(yq read -d '*' $file 'metadata.namespace')
+    for line in $result; do
+      if [[ $allowed_namespace ]] ; then	    
+        if [ $line -ne $allowed_namespace ]; then die "resource in $file has metadata.namespace defined as $line" ; fi
+      else
+        if [[ $line ]]; then die "resource in $file has metadata.namespace defined as $line" ; fi
+      fi
+    done	
+    
+  done	  
+  json_files=$(find $resource_dir -name "*.json")
+  for file in $json_files ; do
+    result=$(jq $file 'metadata.namespace')
+    for line in $result; do
+      if [[ $line ]]; then die "json resource $file has .metadata.namespace defined" ; fi	
+    done
+  done
+}
+
 # Main
 
 # First, make sure we have our namespaces
-if test -f namespaces.yaml
+if test -f ${NAMESPACES_FILE}
 then
-	yq v namespaces.yaml || die "namespaces.yaml is not valid yaml"
+	yq v namespaces.yaml || die "$NAMESPACES_FILE is not valid yaml"
 
-	sensuctl create -f namespaces.yaml 
+	sensuctl create -f namespaces.yaml || die "sensuctl error creating namespaces file"
+        	
 fi
 
-cd $namespaces_dir || die "Failed to cd to namespaces directory!"
-echo "Namespaces Directory: $(pwd)"
+
+cd $NAMESPACES_DIR || die "Failed to cd to namespaces directory!"
+if [[ $VERBOSE ]]; then echo "Namespaces Directory: $(pwd)"; fi
 
 for namespace in $(ls -1)
 do
   # If not a directory of resources then skip
   if ! test -d ${namespace}
   then
-     echo "${namespace} in $namespaces_dir/ is not a directory, skipping"
+     echo "${namespace} in ${NAMESPACES_DIR}/ is not a directory, skipping"
      continue
   fi
+  if [ -z $DISABLE_SANITY_CHECKS ]; then lint_resource_metadata ${namespace} ${MATCHING_LABEL} ${namespace}; fi
 
   if ! is_namespace ${namespace}
   then
@@ -184,8 +186,8 @@ do
 
   echo "Namespace ${namespace}"
   echo -e "Pruning resources...\c"
-  NUM=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${label_selector}" -r -f ${namespace} | jq '. | length')
-  echo "${NUM} resources deleted"
+  num=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${LABEL_SELECTOR}" -r -f ${namespace} | jq '. | length')
+  echo "${num} resources deleted"
 
   echo -e "Creating/Updating resources...\c"
   # Would be really nice if this gave us some type of output

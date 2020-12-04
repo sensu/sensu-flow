@@ -2,6 +2,7 @@ type: CheckConfig
 api_version: core/v2
 metadata:
   name: cpu
+  namespace: ci-namespace
   labels:
     sensu.io/workflow: ci_action 
 spec:

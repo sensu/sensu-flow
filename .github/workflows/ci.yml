@@ -38,7 +38,7 @@ jobs:
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: ci-namespaces
-        required_label: "sensu.io/workflow"
-        label_matching_condition: "== ci_action"
+        matching_label: "sensu.io/workflow"
+        matching_condition: "== ci_action"
 
 

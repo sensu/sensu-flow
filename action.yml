@@ -14,17 +14,23 @@ inputs:
   configure_args:
     description: "optional arguments to pass to sensuctl configure"
     required: false
-  sensu_ca:
+  sensu_ca_string:
     description: 'Optional Custom CA pem string'
+    required: false
+  sensu_ca_file:
+    description: 'Optional Custom CA pem file location'
     required: false
   namespaces_dir:
     description: "Optional directory to process default: 'namespaces' "
     required: false
-  required_label:
-    description: "Option Sensu label selector, default: 'sensu.io/workflow'"
+  namespaces_files:
+    description: "Optional YAML file containing namespace resource to create default: 'namespaces.yaml' "
     required: false
-  label_matching_condition:
-    description: "Option Sensu label matching condition, default: '== sensu_flow'"
+  matching_label:
+    description: "Option Sensu label to use in label selector, default: 'sensu.io/workflow'"
+    required: false
+  matching_condition:
+    description: "Option Sensu label matching condition for label selector, default: '== sensu_flow'"
     required: false
   managed_resources:
     description: 'Optional comma seperated list of managed resources'
