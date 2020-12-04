@@ -2,7 +2,7 @@
 Github Action for Sensu flow resource management pattern.
 
 ## Introduction
-This github action will allow you to manage Sensu resources for a namespaces by making use of sensuctl prune and create commands. The `sensu prune` command is scope by the action's `matching_label`, `matching_condition`, and `managed_resources`settings. Please see the sensuctl command documentation for information.
+This github action will allow you to manage Sensu resources for multiple namespaces by making use of sensuctl prune and create commands. The `sensu prune` command is scoped by the action's `matching_label`, `matching_condition`, and `managed_resources`settings.
 
 In order to use this action, you'll need to define a Sensu user and associated role based access control.
 
@@ -137,4 +137,4 @@ spec:
 ```
 
 ## Adapting to other CI/CD
-If you would like to adapt this for other CI/CD, the sensuflow.sh script from this repository should all you need. The script should be self-documenting with regard to needed executable dependancies and information concerning environment variables used.
+If you would like to adapt this for other CI/CD, take a look at the  sensuflow.sh script from this repositorory. The script should be self-documenting with regard to needed executable dependancies and information concerning environment variables used.
