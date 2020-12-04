@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ###
 # shell script to implement sensuflow
@@ -124,15 +124,15 @@ function lint_resource_metadata {
   allowed_namespace=$3
   if [[ $VERBOSE ]]; then echo "linting resource metadata in $resource_dir"; fi
   yaml_files=$(find $resource_dir -name "*.y?ml")
-  for file in $yaml_files ; do
-    if [[ $required_label ]] ; then
+  for file in $yaml_files; do
+    if [[ $required_label ]]; then
       items=($(yq read -d '*' $file 'metadata.name'))
       labels=($(yq read -d '*' $file "metadata.labels(${required_label}"))
       if [  ${#items[@]} -ne  ${#labels[@]} ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
     fi
     result=$(yq read -d '*' $file 'metadata.namespace')
     for line in $result; do
-      if [[ $allowed_namespace ]] ; then	    
+      if [[ $allowed_namespace ]]; then	    
         if [ $line -ne $allowed_namespace ]; then die "resource in $file has metadata.namespace defined as $line" ; fi
       else
         if [[ $line ]]; then die "resource in $file has metadata.namespace defined as $line" ; fi
