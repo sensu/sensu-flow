@@ -32,7 +32,7 @@ jobs:
       uses: ./
       id: defaults
       with:
-        sensu_backend_url: ws://sensu-backend:8080
+        sensu_backend_url: http://sensu-backend:8080
         sensu_user: admin
         sensu_password: ${{ secrets.SENSU_ADMIN_PASSWORD }} 
         disable_sanity_checks: true
@@ -41,7 +41,7 @@ jobs:
       uses: ./
       id: options
       with:
-        sensu_backend_url: ws://sensu-backend:8080
+        sensu_backend_url: http://sensu-backend:8080
         sensu_user: admin
         sensu_password: ${{ secrets.SENSU_ADMIN_PASSWORD }} 
         namespaces_dir: ci-namespaces
