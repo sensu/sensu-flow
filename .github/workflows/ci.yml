@@ -16,6 +16,12 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    # Service containers to run with `sensu-flow`
+    services:
+      # Label used to access the service container
+      sensu-backend:
+        # Docker Hub image
+        image: jspaleta/sensu-backend-github-action-service
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -26,18 +32,18 @@ jobs:
       uses: ./
       id: defaults
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
-        sensu_user: ${{ secrets.SENSU_USER }}
-        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        sensu_backend_url: ws://sensu-backend:8080
+        sensu_user: admin
+        sensu_password: ${{ secrets.SENSU_ADMIN_PASSWORD }} 
         disable_sanity_checks: true
 
     - name: Sensuflow with optional settings
       uses: ./
       id: options
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
-        sensu_user: ${{ secrets.SENSU_USER }}
-        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        sensu_backend_url: ws://sensu-backend:8080
+        sensu_user: admin
+        sensu_password: ${{ secrets.SENSU_ADMIN_PASSWORD }} 
         namespaces_dir: ci-namespaces
         matching_label: "sensu.io/workflow"
         matching_condition: "== ci_action"
