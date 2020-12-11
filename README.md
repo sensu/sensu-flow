@@ -1,10 +1,10 @@
-# sensuflow-action
-Github Action for Sensu flow resource management pattern.
+# Sensuflow Github Action
+The Github action for Sensuflow, a git based approach to managing Sensu resources.
 
 ## Introduction
-This github action will allow you to manage Sensu resources for multiple namespaces by making use of sensuctl prune and create commands. The `sensu prune` command is scoped by the action's `matching_label`, `matching_condition`, and `managed_resources`settings.
+This Github action will allow you to manage Sensu resources for multiple namespaces by making use of `sensuctl prune` and `sensuctl create` commands. The `sensu prune` command is scoped by the action's `matching_label`, `matching_condition`, and `managed_resources`settings.
 
-In order to use this action, you'll need to define a Sensu user and associated role based access control.
+In order to use this action, you'll first need to define a Sensu user and associated role based access control. A reference RBAC policy and user definition, matching the the actions default settings is provided below as a reference. 
 
 ## Capabilities
 
