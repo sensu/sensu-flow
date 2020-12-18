@@ -59,7 +59,7 @@ If the `namespaces.yaml` file exists in the working directory (normally the top 
 ####  matching_condition:
     description: "Option Sensu label matching condition, default: '== sensu_flow'"
 ####  managed_resources:
-    description: 'Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings"'
+    description: 'Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig""'
 ####  disable_sanity_checks:
     description: 'Optional boolean argument to to disable sanity checks  default: false'    
 
