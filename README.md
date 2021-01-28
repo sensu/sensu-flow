@@ -140,3 +140,20 @@ spec:
 
 ## Adapting to other CI/CD
 If you would like to adapt this for other CI/CD, take a look at the  sensuflow.sh script from this repositorory. The script should be self-documenting with regard to needed executable dependancies and information concerning environment variables used.
+
+## Goals 
+
+SensuFlow is under active development, so please don't hesitate to submit issues for any enhancements you'd like to see. 
+
+The main improvements we're currently focused on at the time of this writing (H1'21) are as follows: 
+
+- Improved pre-flight tests (test Sensu endpoint liveness, verify authentication credentials, etc)
+- Improved linting (label enforcement, type validation, etc)
+- Validate integrity of assets (optionally fetch all configured assets, verify SHA512 values)
+- Reference testing (if a check/handler refers to assets and/or secrets, are the asset/secret resource definitions also present?)
+
+For more information, please view the SensuFlow project [issues][issues] and [milestones][milestones]. 
+
+[issues]: https://github.com/sensu/sensu-flow/issues 
+[milestones]: https://github.com/sensu/sensu-flow/milestones
+
