@@ -54,7 +54,7 @@ preflight_check=0
 [ -z "$MATCHING_LABEL" ] && echo "MATCHING_LABEL environment variable empty" && preflight_check=1
 [ -z "$MATCHING_CONDITION" ] && echo "MATCHING_CONDITION environment variable empty" && preflight_check=1
 [ -z "$MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
-[ -z "$NAMESPACES_DIR" ]  && echo "NAMESPACES_DIE environment variable empty" && preflight_check=1
+[ -z "$NAMESPACES_DIR" ]  && echo "NAMESPACES_DIR environment variable empty" && preflight_check=1
 
 if test $preflight_check -ne 0 ; then
 	echo "Missing environment variables"
@@ -78,6 +78,14 @@ else
  	CA_ARG=''
 fi
 
+if [[ $VERBOSE ]]; then echo "Checking Sensu readiness"; fi
+status=$(curl --connect-timeout 30 -s -o /dev/null -w "%{http_code}"  "$SENSU_BACKEND_URL/health")
+if [ $status -lt 200 ] || [ $status -ge 400 ]; then
+	echo "Sensu Backend does not appear to be ready"
+	echo "Probe of "$SENSU_BACKEND_URL/health" returned status code: $status"
+	exit 1
+fi
+
 if [ "$DISABLE_SANITY_CHECKS" = "false" ]; then
 	DISABLE_SANITY_CHECKS="" 
 fi
@@ -86,6 +94,7 @@ if [ -z "$DISABLE_SANITY_CHECKS" ]; then
 else
 	if [[ $VERBOSE ]]; then echo "sanity checks disabled"; fi
 fi
+
 
 if [[ $VERBOSE ]]; then echo "Configuring sensuctl:"; fi
 sensuctl configure -n --username ${SENSU_USER} --password ${SENSU_PASSWORD} --url ${SENSU_BACKEND_URL} ${CA_ARG}  ${CONFIGURE_OPTIONS}
