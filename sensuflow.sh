@@ -4,7 +4,7 @@
 # shell script to implement sensuflow
 ## External dependancies:
 # sensuctl: https://sensu.io/downloads
-# yq: https://github.com/mikefarah/yq
+# yq: https://github.com/mikefarah/yq/v4
 # jq: https://stedolan.github.io/jq/
 #
 ## Required Environment Variables
@@ -126,33 +126,33 @@ function lint_resource_metadata {
   yaml_files=$(find $resource_dir -name "*.y?ml")
   for file in $yaml_files; do
    if [[ $required_label ]]; then
-      items=$(yq read -d '*' $file 'metadata.name'| wc -l)
-      labels=$(yq read -d '*' $file "metadata.labels(${required_label}" | wc -l)
-      if [  $items -ne  $labels ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
+      bad_labels=$(yq -N e ".metadata.labels[\"${required_label}\"] == null" $file | grep -c 'true' )
+      if [ $bad_labels  -ne 0 ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
    fi
-   result=$(yq read -d '*' $file 'metadata.namespace')
+   result=$(yq -N e '.metadata.namespace' $file)
    for line in $result; do
-     if [[ $allowed_namespace ]]; then	    
-        if [ $line != $allowed_namespace ]; then die "resource in $file has metadata.namespace defined as $line" ; fi
-     else
-        if [[ $line ]]; then die "resource in $file has metadata.namespace defined as $line" ; fi
+     if [ $line != "null" ]; then 
+       if [[ $allowed_namespace ]]; then	    
+         if [ $line != $allowed_namespace ]; then die "resource in $file has metadata.namespace defined as $line" ; fi
+       else
+         if [[ $line ]]; then die "resource in $file has metadata.namespace defined as $line" ; fi
+       fi
      fi
    done	
   done	  
   json_files=$(find $resource_dir -name "*.json")
   for file in $json_files ; do
    if [[ $required_label ]]; then
-      items=$(jq '.metadata.name' $file| wc -l)
-      labels=$(jq ".metadata.labels[\"${required_label}\"]" $file | wc -l)
-      if [  $items -ne  $labels ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
+      bad_labels=$(jq ".metadata.labels[\"${required_label}\"] == null" $file | grep -c 'true')
+      if [ $bad_labels  -ne 0 ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
    fi
    result=$(jq '.metadata.namespace' $file)
    for line in $result; do
      if [ $line != 'null' ]; then
        if [[ $allowed_namespace ]]; then	    
-        if [ $line != \"$allowed_namespace\" ]; then die "Error resource in $file has metadata.namespace defined as $line instead of \"$allowed_namespace\"" ; fi
+         if [ $line != \"$allowed_namespace\" ]; then die "Error resource in $file has metadata.namespace defined as $line instead of \"$allowed_namespace\"" ; fi
        else
-        if [[ $line ]]; then die "resource in $file has metadata.namespace defined as $line" ; fi
+         if [[ $line ]]; then die "resource in $file has metadata.namespace defined as $line" ; fi
        fi
      fi
    done	
@@ -165,7 +165,7 @@ function lint_resource_metadata {
 # First, make sure we have our namespaces
 if test -f ${NAMESPACES_FILE}
 then
-	yq v namespaces.yaml || die "$NAMESPACES_FILE is not valid yaml"
+	yq -N e '.' ${NAMESPACES_FILE}  > /dev/null || die "$NAMESPACES_FILE is not valid yaml"
 
 	sensuctl create -f namespaces.yaml || die "sensuctl error creating namespaces file"
         	
