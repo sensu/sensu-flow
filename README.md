@@ -1,12 +1,40 @@
-# Sensuflow Github Action
-The Github action for Sensuflow, a git based approach to managing Sensu resources.
+# SensuFlow Github Action
+The Github action for SensuFlow, a git based approach to managing Sensu resources.
 
 ## Introduction
-This Github action will allow you to manage Sensu resources for multiple namespaces by making use of `sensuctl prune` and `sensuctl create` commands. The `sensu prune` command is scoped by the action's `matching_label`, `matching_condition`, and `managed_resources`settings.
-
+This Github action will allow you to manage Sensu resources for multiple Sensu namespaces as part Github facilitated CI/CD workflows.
+ 
 In order to use this action, you'll first need to define a Sensu user and associated role based access control. A reference RBAC policy and user definition, matching the the actions default settings is provided below as a reference. 
 
-## Capabilities
+
+## How It Works
+This action provides an opinionated best practises to using the `sensuctl create` and `sensuctl prune` commands in order to efficiently manage Sensu monitoring resources in one more namespaces. The action automates several resource linting actions to help ensure self-consistent monitoring resources are defined prior to updating any Sensu resources.
+
+This is achieved by processing a directory structure where each subdirectory is mapped to a Sensu namespace.
+By default the required directory structure looks like:
+```
+.sensu/
+  cluster/
+    namespaces.yml
+  namespaces/
+    <namespace>/
+      checks/
+      hooks/
+      filters/
+      handlers/
+      handelersets/
+      mutators/
+  
+```
+where `<namespace>` is a placeholder for each Sensu namespace under management.  The `cluster/` directory can be used to optionally manage Sensu Cluster wide resources such as namespaces, if the Sensu RBAC profile in use allows for cluster-wide resource management.
+  
+## Setup
+
+### Configure Sensu RBAC Profile
+### Configure SensuFlow Github action
+### Test the Github action using dedicated namespace
+
+## Github Action Configuration Reference
 
 ### Namespace Resource Management
 This action uses a special directory structure, mapping subdirectory names to Sensu namespaces to process. By default the directory processed is `namespaces/`  but this can be overridden in the action configuration. If this directory exists, each sub directory will be processed as separate Sensu namespace. Example directory structure:
