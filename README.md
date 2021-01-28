@@ -20,11 +20,11 @@ namespaces
     │   └── true.yaml
     ├── filters
     │   └── fatigue-check.yaml
+    ├── handlersets
+    │   └── alert.yaml
     ├── handlers
-    │   └── alert
-    │       ├── aws-sns.yaml
-    │       ├── pushover.yaml
-    │       └── set.yaml
+    │   ├── aws-sns.yaml
+    │   └── pushover.yaml
     └── mutators
         └── check-status.yaml
 ```
@@ -32,7 +32,9 @@ namespaces
 Using this example, this action would process the `test-namespace`, pruning the namespace resources according to `matching_label`, `matching_condition`,  and `managed_resources`settings
 
 ### Optionally Preparing namespaces
-If the `namespaces.yaml` file exists in the working directory (normally the top level of your repository) then this action will be used to create sensu namespaces before attempting to process the namespaces directory.
+If the `namespaces.yaml` file exists in the working directory (normally the top level of your repository) then this action will be used to create sensu namespaces before attempting to process the namespaces directory. 
+
+Note: Namespaces are a cluster level resource, so in order to use the namespaces creation capability the sensu user will need cluser level role based access to create namespaces.  
 
 ## Configuration
 ### Required settings
