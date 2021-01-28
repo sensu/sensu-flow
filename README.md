@@ -77,7 +77,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Sensuflow with optional settings
-      uses: sensu/sensuflow@v0.2.1
+      uses: sensu/sensuflow@v0.2.2
       with:
         sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
