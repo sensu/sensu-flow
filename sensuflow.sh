@@ -34,8 +34,8 @@ fi
 : ${MATCHING_LABEL:=${INPUT_MATCHING_LABEL:="sensu.io/workflow"}}
 : ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== sensu_flow"}}
 : ${MANAGED_RESOURCES:=${INPUT_MANAGED_RESOURCES:="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"}}
-: ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:="namespaces"}}
-: ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:="namespaces.yaml"}}
+: ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:=".sensu/namespaces"}}
+: ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:=".sensu/cluster/namespaces.yaml"}}
 : ${DISABLE_SANITY_CHECKS:=${INPUT_DISABLE_SANITY_CHECKS:="false"}}
 : ${VERBOSE:=${INPUT_VERBOSE:=""}}
 : ${SENSU_USER:=${INPUT_SENSU_USER}}
