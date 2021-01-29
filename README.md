@@ -70,6 +70,60 @@ $ sensuctl user create sensu-flow \
 ```
 
 ### Configure SensuFlow Github action
+In order to make use of this Github action you will need to use it as part of a github action workflow YAML definition. GitHub action workflow definitions are placed in `.github/workflow/` in your repository and must exist in the default branch. Please see the Github action documentation for specifics.
+
+
+The action requires 3 configuration options to be defined:
+```
+sensu_backend_url
+sensu_user
+sensu_password
+```
+All other configuration options are considered optional
+
+You will also want to considering GitHub secrets for sensitive information used in the action configuration. At a minimum you will want to consider using Github secrets for the `sensu_user` and `sensu_password`.
+
+### Verifying Configuration
+Below is a working example that will run the SensuFlow Github action when pushing to main branch or when a main branch pull-request is created.
+
+#### Github Action Workflow Example
+Save as `.github.workflow/sensu-flow.yaml` and commit to main branch. After activating the workflow in the Github UX, this action will run.
+When testing initially consider using a non-production testing Sensu namespace.
+
+```
+name: SensuFlow CI Example
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Defined the SensuFlow job 
+  SensuFlow:
+    runs-on: ubuntu-latest
+    steps:
+    # Step 1: Checks-out your repository, so your job can access it
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Step 2: use the versioned sensu/sensuflow action 
+    - name: Sensuflow with required settings
+      uses: sensu/sensu-flow@v0.3
+      with:
+        # Required configuration
+        # Please make use of GitHub secrets for sensitive information 
+        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_user: ${{ secrets.SENSU_USER }}
+        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        # Optional configuration
+        namespaces_dir: .sensu/namespaces
+        namespaces_file: .sensu/cluster/namespaces.yaml
+        matching_label: "sensu.io/workflow"
+        matching_condition: "== sensu-flow"
+
+```
 ### Test the Github action using dedicated namespace
 
 ## Github Action Configuration Reference
@@ -132,28 +186,6 @@ Note: Namespaces are a cluster level resource, so in order to use the namespaces
 ####  disable_sanity_checks:
     description: 'Optional boolean argument to to disable sanity checks  default: false'    
 
-### Github Action Workflow Example
-```
-jobs:
-  sensuflow:
-    runs-on: ubuntu-latest
-
-    steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Sensuflow with optional settings
-      uses: sensu/sensuflow@v0.2.2
-      with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
-        sensu_user: ${{ secrets.SENSU_USER }}
-        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
-        namespaces_dir: namespaces
-        matching_label: "sensu.io/workflow"
-        matching_condition: "== sensu_flow"
-
-```
 
 ## Adapting to other CI/CD
 If you would like to adapt this for other CI/CD, take a look at the  sensuflow.sh script from this repositorory. The script should be self-documenting with regard to needed executable dependancies and information concerning environment variables used.
