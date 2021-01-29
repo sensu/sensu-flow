@@ -221,7 +221,7 @@ This action uses a special directory structure, mapping subdirectory names to Se
 Using this example, this action would process the `test-namespace`, pruning the namespace resources according to `matching_label`, `matching_condition`,  and `managed_resources`settings
 
 ### Optionally Preparing namespaces
-If the namespaces file  (default: `.sensu/cluster/namespaces.yaml`) exists then this action will be used to create sensu namespaces before attempting to process the namespaces directory. 
+If the namespaces file  (default: `.sensu/cluster/namespaces.yaml`) exists and is populated with Sensu namespace resource definitions then this action will be used to create the Sensu namespace resources defined in the file before attempting to process the namespaces directory. 
 
 Note: Namespaces are a cluster level resource, so in order to use the namespaces creation capability the sensu user will need cluser level role based access to create namespaces.  
 
