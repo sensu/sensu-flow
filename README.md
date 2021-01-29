@@ -111,7 +111,7 @@ jobs:
 
     # Step 2: use the versioned sensu/sensuflow action 
     - name: Sensuflow with required settings
-      uses: sensu/sensu-flow@v0.3
+      uses: sensu/sensu-flow@0.3.0
       with:
         # Required configuration
         # Please make use of GitHub secrets for sensitive information 
