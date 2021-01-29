@@ -75,30 +75,31 @@ $ sensuctl user create sensu-flow \
 ## Github Action Configuration Reference
 
 ### Namespace Resource Management
-This action uses a special directory structure, mapping subdirectory names to Sensu namespaces to process. By default the directory processed is `namespaces/`  but this can be overridden in the action configuration. If this directory exists, each sub directory will be processed as separate Sensu namespace. Example directory structure:
+This action uses a special directory structure, mapping subdirectory names to Sensu namespaces to process. By default the directory processed is `.sensu/namespaces/`  but this can be overridden in the action configuration. If this directory exists, each sub directory will be processed as separate Sensu namespace. Example directory structure:
 ```
-namespaces
-└── test-namespace
-    ├── checks
-    │   ├── check-cpu.yaml
-    │   ├── check-http.yaml
-    │   ├── false.yaml
-    │   └── true.yaml
-    ├── filters
-    │   └── fatigue-check.yaml
-    ├── handlersets
-    │   └── alert.yaml
-    ├── handlers
-    │   ├── aws-sns.yaml
-    │   └── pushover.yaml
-    └── mutators
-        └── check-status.yaml
+.sensu
+└── namespaces
+    └── test-namespace
+        ├── checks
+        │   ├── check-cpu.yaml
+        │   ├── check-http.yaml
+        │   ├── false.yaml
+        │   └── true.yaml
+        ├── filters
+        │   └── fatigue-check.yaml
+        ├── handlersets
+        │   └── alert.yaml
+        ├── handlers
+        │   ├── aws-sns.yaml
+        │   └── pushover.yaml
+        └── mutators
+            └── check-status.yaml
 ```
 
 Using this example, this action would process the `test-namespace`, pruning the namespace resources according to `matching_label`, `matching_condition`,  and `managed_resources`settings
 
 ### Optionally Preparing namespaces
-If the `namespaces.yaml` file exists in the working directory (normally the top level of your repository) then this action will be used to create sensu namespaces before attempting to process the namespaces directory. 
+If the namespaces file  (default: `.sensu/cluster/namespaces.yaml`) exists then this action will be used to create sensu namespaces before attempting to process the namespaces directory. 
 
 Note: Namespaces are a cluster level resource, so in order to use the namespaces creation capability the sensu user will need cluser level role based access to create namespaces.  
 
@@ -119,9 +120,9 @@ Note: Namespaces are a cluster level resource, so in order to use the namespaces
 ####  sensu_ca_file:
     description: 'Optional Custom CA file location, this will override sensu_ca_string if used'
 ####  namespaces_dir:
-    description: "Optional directory to process default: 'namespaces' "
+    description: "Optional directory to process default: '.sensu/namespaces' "
 ####  namespaces_file:
-    description: "Optional YAML file containing Sensu namespace resources to create"
+    description: "Optional YAML file containing Sensu namespace resources to create default '.sensu/cluster/namespaces.yml'"
 ####  matching_label:
     description: "Option Sensu label selector, default: 'sensu.io/workflow'"
 ####  matching_condition:
