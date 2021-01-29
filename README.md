@@ -72,7 +72,7 @@ $ sensuctl user create sensu-flow \
 ```
 
 ### Configure SensuFlow Github action
-In order to make use of this Github action you will need to use it as part of a github action workflow YAML definition. GitHub action workflow definitions are placed in `.github/workflow/` in your repository and must exist in the default branch. Please see the Github action documentation for specifics.
+In order to make use of this Github action you will need to use it as part of a github action workflow YAML definition. GitHub action workflow definitions are placed in `.github/workflows/` in your repository and must exist in the default branch. Please see the Github action documentation for specifics.
 
 
 The action requires 3 configuration options to be defined:
@@ -89,7 +89,7 @@ You will also want to considering GitHub secrets for sensitive information used 
 Below is a working example that will run the SensuFlow Github action when pushing to main branch or when a main branch pull-request is created.
 
 #### Github Action Workflow Example
-Save as `.github.workflow/sensu-flow.yaml` and commit to main branch. After activating the workflow in the Github UX, this action should run for any commits into main.
+Save as `.github/workflows/sensu-flow.yaml` and commit to main branch. After activating the workflow in the Github UX, this action should run for any commits into main.
 
 ```
 name: SensuFlow CI Example
