@@ -39,7 +39,7 @@ You will need to run these commands in an an environment where sensuctl is pre-c
 The Sensu ClusterRole defines the resource permissions the github resource will need.
 ```
 $ sensuctl cluster-role create sensu-flow \
-  --resource namespaces,roles,rolebindings,assets,handlers,checks,filters,mutators,secrets \
+  --resource namespaces,roles,rolebindings,assets,handlers,checks,hooks,filters,mutators,secrets \
   --verb get,list,create,update,delete
 ```
 
@@ -122,7 +122,7 @@ jobs:
         namespaces_dir: .sensu/namespaces
         namespaces_file: .sensu/cluster/namespaces.yaml
         matching_label: "sensu.io/workflow"
-        matching_condition: "== sensu-flow"
+        matching_condition: "== 'sensu-flow'"
 
 ```
 ### Your first SensuFlow workflow
@@ -141,11 +141,12 @@ spec:
 ### Create corresponding namespace directory
 ```
 mkdir -p .sensu/namespaces/test-namespace
+touch .sensu/namespaces/.keep
 ``` 
 
-The SensuFlow action will process this directory, using resource definitions found within as a source of truth for the state of the corresponding Sensu namespace.
+The SensuFlow action will process the `test-namespace` directory, using resource definitions found within as a source of truth for the state of the corresponding Sensu namespace.  The `.keep` file just tells git to keep the directory structure as part of the repository even if there are no files defined in it.  
 
-### Create a check in the test-namespace
+### Create initial resources in test-namespace
 mkdir `.sensu/namespaces/test-namespace/checks`
 edit the file `.sensu/namespaces/test-namespace/checks/hello_world.yaml`
 ```
@@ -163,18 +164,34 @@ spec:
   - test
   timeout: 10
 ```
+
+mkdir `.sensu/namespaces/test-namespace/handlers`
+edit the file `.sensu/namespaces/test-namespace/handlers/test.yaml`
+```
+type: Handler
+api_version: core/v2
+metadata:
+  name: test
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: sleep 10
+  type: pipe
+```
+
 ### Commit and push changes
-Once these files are in place, you can commit and push the changes back to Github. The Github SensuFlow action show trigger, and run to completion.
+Once these files are in place, you can commit and push the changes back to Github. The Github SensuFlow action should trigger, and run to completion.
 You can then verify using sensuctl in your administrative environment that the test-namespace exists
 ```
 sensuctl namespace list
 ```
-and that the namespace contains the hello-world check
+and that the namespace contains the hello-world check and the test handler
 ```
 sensuctl --namespace test-namespace check list
+sensuctl --namespace test-namespace handler list
 ```
 ### Delete the check from the git repository
-Now delete the `hello_world.yaml` file and commit the change again.  The SensuFlow action will use `sensuctl prune` to remove the check and you should beable to verify that the check no longer exists in the test-namespace.
+Now delete the `hello_world.yaml` file and commit the change again.  The SensuFlow action will use `sensuctl prune` to remove the check and you should be able to verify that the check no longer exists in the test-namespace.
 
 
 ## Github Action Configuration Reference
