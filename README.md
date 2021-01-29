@@ -147,7 +147,7 @@ The SensuFlow action will process this directory, using resource definitions fou
 
 ### Create a check in the test-namespace
 mkdir `.sensu/namespaces/test-namespace/checks`
-edit the file `.sensu/namespaces/test-namespace/checks/hello_world.yaml
+edit the file `.sensu/namespaces/test-namespace/checks/hello_world.yaml`
 ```
 type: CheckConfig
 api_version: core/v2
