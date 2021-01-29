@@ -31,6 +31,44 @@ where `<namespace>` is a placeholder for each Sensu namespace under management. 
 ## Setup
 
 ### Configure Sensu RBAC Profile
+Below are instructions to create a RBAC profile that can be used with this action with the default settings. This profile makes use of Sensu CluserRole and ClusterRoleBindings to grant the action user access to a subset of Sensu resources cluster-wide. You may want to use a more restrictive RBAC policy to meet your security requirements.
+
+#### Create the sensu-flow ClusterRole
+The Sensu ClusterRole defines the resource permissions the github resource will need.
+```
+$ sensuctl cluster-role create sensu-flow \
+  --resource namespaces,roles,rolebindings,assets,handlers,checks,filters,mutators,secrets \
+  --verb get,list,create,update,delete
+```
+
+#### Create the sensu-flow ClusterRoleBinding
+The Sensu ClusterRoleBinding connects the ClusterRole to a group of users
+```
+$ sensuctl cluster-role-binding create sensu-flow \
+  --cluster-role sensu-flow \
+  --group sensu-flow
+```
+
+#### Create the sensu-flow User
+A Sensu user and password is needed to authenticate with the Sensu API. Make sure the user is a member of the `sensu-flow` group.
+
+Create the user interactively:
+```
+$ sensuctl user create --interactive
+? Username: sensu-flow
+? Password: *********
+? Groups: sensu-flow
+Created
+```
+
+or, create the user non-interactively:
+```
+$ sensuctl user create sensu-flow \
+  --password REPLACEME \
+  --groups sensu-flow
+
+```
+
 ### Configure SensuFlow Github action
 ### Test the Github action using dedicated namespace
 
@@ -114,56 +152,6 @@ jobs:
         matching_label: "sensu.io/workflow"
         matching_condition: "== sensu_flow"
 
-```
-### RBAC Policy
-Here is an example of an expansive Sensu RBAC policy and user definition  configured to use this action with default settings. You may want to use a more restrictive RBAC policy to meet your requirements. 
-
-```
----
-type: ClusterRole
-api_version: core/v2
-metadata:
-  name: sensu_flow
-spec:
-  rules:
-  - resources:
-    - namespaces
-    - roles
-    - rolebindings
-    - assets
-    - handlers
-    - checks
-    - filters
-    - mutators
-    - secrets
-    verbs:
-    - get
-    - list
-    - create
-    - update
-    - delete
----
-type: ClusterRoleBinding
-api_version: core/v2
-metadata:
-  name: sensu_flow
-spec:
-  role_ref:
-    type: ClusterRole
-    name: sensu_flow
-  subjects:
-  - type: Group
-    name: sensu_flow
----
-type: User 
-api_version: core/v2 
-metadata:
-  name: sensu_flow
-spec:
-  disabled: false
-  username: sensu_flow
-  groups: 
-  - sensu_flow
 ```
 
 ## Adapting to other CI/CD
