@@ -34,8 +34,8 @@ fi
 : ${MATCHING_LABEL:=${INPUT_MATCHING_LABEL:="sensu.io/workflow"}}
 : ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== sensu_flow"}}
 : ${MANAGED_RESOURCES:=${INPUT_MANAGED_RESOURCES:="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"}}
-: ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:="namespaces"}}
-: ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:="namespaces.yaml"}}
+: ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:=".sensu/namespaces"}}
+: ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:=".sensu/cluster/namespaces.yaml"}}
 : ${DISABLE_SANITY_CHECKS:=${INPUT_DISABLE_SANITY_CHECKS:="false"}}
 : ${VERBOSE:=${INPUT_VERBOSE:=""}}
 : ${SENSU_USER:=${INPUT_SENSU_USER}}
@@ -176,7 +176,7 @@ if test -f ${NAMESPACES_FILE}
 then
 	yq -N e '.' ${NAMESPACES_FILE}  > /dev/null || die "$NAMESPACES_FILE is not valid yaml"
 
-	sensuctl create -f namespaces.yaml || die "sensuctl error creating namespaces file"
+	sensuctl create -f ${NAMESPACES_FILE} || die "sensuctl error creating namespaces file"
         	
 fi
 
@@ -212,6 +212,11 @@ do
   echo -e "Creating/Updating resources...\c"
   # Would be really nice if this gave us some type of output
   sensuctl create -r -f ${namespace} --namespace ${namespace}
+  retval=$?
+  if test $retval -ne 0; then 
+	echo "Error during sensuctl create!"
+	exit 1
+  fi
   echo -e "Done\n"
 
 done
