@@ -33,6 +33,8 @@ where `<namespace>` is a placeholder for each Sensu namespace under management. 
 ### Configure Sensu RBAC Profile
 Below are instructions to create a RBAC profile that can be used with this action with the default settings. This profile makes use of Sensu CluserRole and ClusterRoleBindings to grant the action user access to a subset of Sensu resources cluster-wide. You may want to use a more restrictive RBAC policy to meet your security requirements.
 
+You will need to run these commands in an an environment where sensuctl is pre-configured to communicate with the Sensu backend you want SensuFlow to work with.
+
 #### Create the sensu-flow ClusterRole
 The Sensu ClusterRole defines the resource permissions the github resource will need.
 ```
@@ -87,8 +89,7 @@ You will also want to considering GitHub secrets for sensitive information used 
 Below is a working example that will run the SensuFlow Github action when pushing to main branch or when a main branch pull-request is created.
 
 #### Github Action Workflow Example
-Save as `.github.workflow/sensu-flow.yaml` and commit to main branch. After activating the workflow in the Github UX, this action will run.
-When testing initially consider using a non-production testing Sensu namespace.
+Save as `.github.workflow/sensu-flow.yaml` and commit to main branch. After activating the workflow in the Github UX, this action should run for any commits into main.
 
 ```
 name: SensuFlow CI Example
@@ -117,14 +118,64 @@ jobs:
         sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
-        # Optional configuration
+        # Optional configuration, if not present defaults will be used
         namespaces_dir: .sensu/namespaces
         namespaces_file: .sensu/cluster/namespaces.yaml
         matching_label: "sensu.io/workflow"
         matching_condition: "== sensu-flow"
 
 ```
-### Test the Github action using dedicated namespace
+### Your first SensuFlow workflow
+Now that the action is activated and configured to run on any push into the main branch, you can test it.
+
+#### Create a test namespace
+edit the file `.sensu/cluster/namespaces.yaml` in your git repository and define a Sensu namespace resource for a new testing namespace.
+```
+---
+type: Namespace
+api_version: core/v2
+spec:
+  name: test-namespace
+```
+
+### Create corresponding namespace directory
+```
+mkdir -p .sensu/namespaces/test-namespace
+``` 
+
+The SensuFlow action will process this directory, using resource definitions found within as a source of truth for the state of the corresponding Sensu namespace.
+
+### Create a check in the test-namespace
+mkdir `.sensu/namespaces/test-namespace/checks`
+edit the file `.sensu/namespaces/test-namespace/checks/hello_world.yaml
+```
+type: CheckConfig
+api_version: core/v2
+metadata:
+  name: hello_world
+  labels:
+    sensu.io/workflow: sensu-flow
+spec:
+  command: echo "hello world"
+  interval: 30
+  publish: false
+  subscriptions:
+  - test
+  timeout: 10
+```
+### Commit and push changes
+Once these files are in place, you can commit and push the changes back to Github. The Github SensuFlow action show trigger, and run to completion.
+You can then verify using sensuctl in your administrative environment that the test-namespace exists
+```
+sensuctl namespace list
+```
+and that the namespace contains the hello-world check
+```
+sensuctl --namespace test-namespace check list
+```
+### Delete the check from the git repository
+Now delete the `hello_world.yaml` file and commit the change again.  The SensuFlow action will use `sensuctl prune` to remove the check and you should beable to verify that the check no longer exists in the test-namespace.
+
 
 ## Github Action Configuration Reference
 
