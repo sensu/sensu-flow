@@ -23,7 +23,7 @@ inputs:
   namespaces_dir:
     description: "Optional directory to process default: 'namespaces' "
     required: false
-  namespaces_files:
+  namespaces_file:
     description: "Optional YAML file containing namespace resource to create default: 'namespaces.yaml' "
     required: false
   matching_label:
