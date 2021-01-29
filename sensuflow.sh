@@ -212,6 +212,11 @@ do
   echo -e "Creating/Updating resources...\c"
   # Would be really nice if this gave us some type of output
   sensuctl create -r -f ${namespace} --namespace ${namespace}
+  retval=$?
+  if test $retval -ne 0; then 
+	echo "Error during sensuctl create!"
+	exit 1
+  fi
   echo -e "Done\n"
 
 done
