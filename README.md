@@ -248,7 +248,7 @@ Note: Namespaces are a cluster level resource, so in order to use the namespaces
 ####  matching_label:
     description: "Option Sensu label selector, default: 'sensu.io/workflow'"
 ####  matching_condition:
-    description: "Option Sensu label matching condition, default: '== sensu_flow'"
+    description: "Option Sensu label matching condition, default: '== sensu-flow'"
 ####  managed_resources:
     description: 'Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig""'
 ####  disable_sanity_checks:
