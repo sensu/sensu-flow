@@ -1,5 +1,5 @@
 # action.yml
-name: 'Sensu Flow'
+name: 'SensuFlow'
 description: 'Manage sensu resources using sensuctl prune and create commands'
 inputs:
   sensu_backend_url:
