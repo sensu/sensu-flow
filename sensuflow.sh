@@ -1,7 +1,7 @@
 #!/usr/bin/env ash
 
 ###
-# shell script to implement sensuflow
+# shell script to implement SensuFlow
 ## External dependancies:
 # sensuctl: https://sensu.io/downloads
 # yq: https://github.com/mikefarah/yq/v4
@@ -22,8 +22,9 @@
 # MATCHING_CONDITION: condition to match
 # DISABLE_SANITY_CHECKS: if set disable sanity checks
 
-## Github Action Notes
-# Github Actions prefaces variables with INPUT_ 
+## GitHub Action Notes
+# GitHub Actions prefaces variables with INPUT_
+# This script maps INPUT_<VAR> to <VAR> for compatibility
 
 ## Read in envvars from .env from current directory
 if [ -f  ./.env ] ; then
