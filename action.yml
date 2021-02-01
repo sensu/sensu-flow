@@ -12,7 +12,7 @@ inputs:
     description: 'The Sensu user password (alt use env SENSU_PASSWORD'
     required: true
   configure_args:
-    description: "optional arguments to pass to sensuctl configure"
+    description: "Optional arguments to pass to sensuctl configure"
     required: false
   sensu_ca_string:
     description: 'Optional Custom CA pem string'
@@ -27,10 +27,10 @@ inputs:
     description: "Optional YAML file containing namespace resource to create default: 'namespaces.yaml' "
     required: false
   matching_label:
-    description: "Option Sensu label to use in label selector, default: 'sensu.io/workflow'"
+    description: "Optional Sensu label to use in label selector, default: 'sensu.io/workflow'"
     required: false
   matching_condition:
-    description: "Option Sensu label matching condition for label selector, default: '== sensu_flow'"
+    description: "Optional Sensu label matching condition for label selector, default: '== sensu-flow'"
     required: false
   managed_resources:
     description: 'Optional comma seperated list of managed resources'
