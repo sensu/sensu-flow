@@ -182,7 +182,8 @@ function lint_resource_metadata {
 if test -f ${NAMESPACES_FILE}
 then
 	yq -N e '.' ${NAMESPACES_FILE}  > /dev/null || die "$NAMESPACES_FILE is not valid yaml"
-
+        bad_resource_count=$(yq -N e '.type' ${NAMESPACES_FILE}  | grep -c -v "Namespace")
+  	if test $bad_resource_count -ne 0; then die "${NAMESPACES_FILE} has non Namespace Sensu Resources defined" ; fi
 	sensuctl create -f ${NAMESPACES_FILE} || die "sensuctl error creating namespaces file"
         	
 fi
