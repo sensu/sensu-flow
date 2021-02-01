@@ -1,15 +1,15 @@
 # action.yml
 name: 'SensuFlow'
-description: 'Manage sensu resources using sensuctl prune and create commands'
+description: 'Manage Sensu resources using sensuctl prune and create commands'
 inputs:
   sensu_backend_url:
-    description: 'The Sensu backend url (alt use env SENSU_BACKEND_URL'
+    description: 'The Sensu backend url (alt use env SENSU_BACKEND_URL)'
     required: true
   sensu_user:
-    description: 'The Sensu user to auth (alt use env SENSU_USER'
+    description: 'The Sensu user to auth (alt use env SENSU_USER)'
     required: true
   sensu_password:
-    description: 'The Sensu user password (alt use env SENSU_PASSWORD'
+    description: 'The Sensu user password (alt use env SENSU_PASSWORD)'
     required: true
   configure_args:
     description: "Optional arguments to pass to sensuctl configure"
@@ -21,10 +21,10 @@ inputs:
     description: 'Optional Custom CA pem file location'
     required: false
   namespaces_dir:
-    description: "Optional directory to process default: 'namespaces' "
+    description: "Optional directory to process default: '.sensu/namespaces' "
     required: false
   namespaces_file:
-    description: "Optional YAML file containing namespace resource to create default: 'namespaces.yaml' "
+    description: "Optional YAML file containing namespace resource to create default: '.sensu/cluster/namespaces.yml' "
     required: false
   matching_label:
     description: "Optional Sensu label to use in label selector, default: 'sensu.io/workflow'"
