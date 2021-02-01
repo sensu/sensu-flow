@@ -85,6 +85,13 @@ if [ $status -lt 200 ] || [ $status -ge 400 ]; then
 	echo "Probe of "$SENSU_BACKEND_URL/health" returned status code: $status"
 	exit 1
 fi
+if [[ $VERBOSE ]]; then echo "Checking Sensu auth credentials"; fi
+status=$(curl --connect-timeout 30 -o /dev/null -s -w "%{http_code}" -X GET "${SENSU_BACKEND_URL}/auth/test" -u "${SENSU_USER}:${SENSU_PASSWORD}")
+if [ $status -lt 200 ] || [ $status -ge 400 ]; then
+	echo "Sensu auth failed"
+	echo "Probe of "$SENSU_BACKEND_URL/auth/test" returned status code: $status"
+	exit 1
+fi
 
 if [ "$DISABLE_SANITY_CHECKS" = "false" ]; then
 	DISABLE_SANITY_CHECKS="" 
