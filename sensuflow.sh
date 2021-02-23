@@ -34,7 +34,7 @@ fi
 
 ### Setup envvar values, including fallback defaults where needed
 : ${MATCHING_LABEL:=${INPUT_MATCHING_LABEL:="sensu.io/workflow"}}
-: ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== 'sensu-flow'"}}
+: ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== 'sensuflow'"}}
 : ${MANAGED_RESOURCES:=${INPUT_MANAGED_RESOURCES:="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"}}
 : ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:=".sensu/namespaces"}}
 : ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:=".sensu/cluster/namespaces.yaml"}}
