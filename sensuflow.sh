@@ -135,6 +135,8 @@ function lint_resource_metadata {
   yaml_files=$(find $resource_dir -name "*.y?ml")
   for file in $yaml_files; do
    if [[ $required_label ]]; then
+      bad_labels=$(yq -N e ".metadata.labels | has(\"${required_label}\")" $file | grep -c 'false' )
+      if [ $bad_labels  -ne 0 ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
       bad_labels=$(yq -N e ".metadata.labels[\"${required_label}\"] == null" $file | grep -c 'true' )
       if [ $bad_labels  -ne 0 ] ; then die "resource in $file may be missing label $MATCHING_LABEL" ; fi
    fi
@@ -205,8 +207,18 @@ do
 
 
   echo "Namespace ${namespace}"
-  echo -e "Pruning resources...\c"
+  echo -e "Pruning resources...\n"
+  if [[ $VERBOSE ]] 
+  then 
+	  echo -e "sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector \"${LABEL_SELECTOR}\" -r -f ${namespace} | jq '. | length'"
+  fi
+
   num=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${LABEL_SELECTOR}" -r -f ${namespace} | jq '. | length')
+  retval=$?
+  if test $retval -ne 0; then 
+	echo "Error during sensuctl prune!"
+	exit 1
+  fi
   echo "${num} resources deleted"
 
   echo -e "Creating/Updating resources...\c"
