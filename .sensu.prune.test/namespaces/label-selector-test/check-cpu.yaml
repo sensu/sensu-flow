@@ -7,5 +7,6 @@ metadata:
 spec:
   command: echo "empty prune check"
   publish: false
+  interval: 60
   subscriptions:
   - linux
