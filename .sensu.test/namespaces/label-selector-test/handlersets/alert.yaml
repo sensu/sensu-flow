@@ -1,0 +1,12 @@
+---
+type: Handler
+api_version: core/v2
+metadata:
+  name: alert
+  labels:
+    sensu.io/workflow: ci_action 
+spec:
+  handlers:
+  - pushover
+  - aws-sns
+  type: set

@@ -43,3 +43,14 @@ jobs:
         matching_condition: "== ci_action"
 
 
+    - name: Sensuflow matching label with dashes
+      uses: ./
+      id: options
+      with:
+        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_user: ${{ secrets.SENSU_USER }}
+        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        namespaces_dir: .sensu.test/namespaces/
+        namespaces_file: .sensu.test/cluster/namespaces.yaml
+        matching_label: "sensu.io/workflow"
+        matching_condition: "== 'sensu-flow'"

@@ -1,7 +1,7 @@
 #!/usr/bin/env ash
 
 ###
-# shell script to implement sensuflow
+# shell script to implement SensuFlow
 ## External dependancies:
 # sensuctl: https://sensu.io/downloads
 # yq: https://github.com/mikefarah/yq/v4
@@ -21,9 +21,11 @@
 # MATCHING_LABEL: resource label to match
 # MATCHING_CONDITION: condition to match
 # DISABLE_SANITY_CHECKS: if set disable sanity checks
+# DISABLE_TLS_VERIFY: if set disable TLS verification 
 
-## Github Action Notes
-# Github Actions prefaces variables with INPUT_ 
+## GitHub Action Notes
+# GitHub Actions prefaces variables with INPUT_
+# This script maps INPUT_<VAR> to <VAR> for compatibility
 
 ## Read in envvars from .env from current directory
 if [ -f  ./.env ] ; then
@@ -32,11 +34,12 @@ fi
 
 ### Setup envvar values, including fallback defaults where needed
 : ${MATCHING_LABEL:=${INPUT_MATCHING_LABEL:="sensu.io/workflow"}}
-: ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== sensu_flow"}}
+: ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== 'sensuflow'"}}
 : ${MANAGED_RESOURCES:=${INPUT_MANAGED_RESOURCES:="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"}}
 : ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:=".sensu/namespaces"}}
 : ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:=".sensu/cluster/namespaces.yaml"}}
 : ${DISABLE_SANITY_CHECKS:=${INPUT_DISABLE_SANITY_CHECKS:="false"}}
+: ${DISABLE_TLS_VERIFY:=${INPUT_DISABLE_TLS_VERIFY:="false"}}
 : ${VERBOSE:=${INPUT_VERBOSE:=""}}
 : ${SENSU_USER:=${INPUT_SENSU_USER}}
 : ${SENSU_PASSWORD:=${INPUT_SENSU_PASSWORD}}
@@ -77,12 +80,29 @@ if [ -s $SENSU_CA_FILE ]; then
 else
  	CA_ARG=''
 fi
+if [ "$DISABLE_TLS_VERIFY" = "false" ]; then
+	DISABLE_TLS_VERIFY="" 
+fi
+if [ -z "$DISABLE_TLS_VERIFY" ]; then
+	if [[ $VERBOSE ]]; then echo "tls verification enabled"; fi
+	curl_command="curl "
+else
+	if [[ $VERBOSE ]]; then echo "tls verification  disabled"; fi
+	curl_command="curl -k"
+fi
 
 if [[ $VERBOSE ]]; then echo "Checking Sensu readiness"; fi
-status=$(curl --connect-timeout 30 -s -o /dev/null -w "%{http_code}"  "$SENSU_BACKEND_URL/health")
+status=$(${curl_command} --connect-timeout 30 -s -o /dev/null -w "%{http_code}"  "$SENSU_BACKEND_URL/health")
 if [ $status -lt 200 ] || [ $status -ge 400 ]; then
 	echo "Sensu Backend does not appear to be ready"
 	echo "Probe of "$SENSU_BACKEND_URL/health" returned status code: $status"
+	exit 1
+fi
+if [[ $VERBOSE ]]; then echo "Checking Sensu auth credentials"; fi
+status=$(${curl_command} --connect-timeout 30 -k -o /dev/null -s -w "%{http_code}" -X GET "${SENSU_BACKEND_URL}/auth/test" -u "${SENSU_USER}:${SENSU_PASSWORD}")
+if [ $status -lt 200 ] || [ $status -ge 400 ]; then
+	echo "Sensu auth failed"
+	echo "Probe of "$SENSU_BACKEND_URL/auth/test" returned status code: $status"
 	exit 1
 fi
 
@@ -177,7 +197,8 @@ function lint_resource_metadata {
 if test -f ${NAMESPACES_FILE}
 then
 	yq -N e '.' ${NAMESPACES_FILE}  > /dev/null || die "$NAMESPACES_FILE is not valid yaml"
-
+        bad_resource_count=$(yq -N e '.type' ${NAMESPACES_FILE}  | grep -c -v "Namespace")
+  	if test $bad_resource_count -ne 0; then die "${NAMESPACES_FILE} has non Namespace Sensu Resources defined" ; fi
 	sensuctl create -f ${NAMESPACES_FILE} || die "sensuctl error creating namespaces file"
         	
 fi
