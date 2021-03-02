@@ -3,7 +3,7 @@ api_version: core/v2
 metadata:
   name: cpu
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
 spec:
   check_hooks: null
   command: check-cpu.rb
@@ -41,7 +41,7 @@ metadata:
     io.sensu.bonsai.version: 4.1.0
   name: sensu-plugins/sensu-plugins-cpu-checks:4.1.0
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
 spec:
   builds:
   - filters:
@@ -104,7 +104,7 @@ metadata:
     io.sensu.bonsai.version: 0.0.10
   name: sensu/sensu-ruby-runtime:0.0.10
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
 spec:
   builds:
   - filters:

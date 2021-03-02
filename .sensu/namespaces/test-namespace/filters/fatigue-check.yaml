@@ -3,7 +3,7 @@ api_version: core/v2
 metadata:
   name: fatigue-check
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
 spec:
   action: allow
   expressions:
@@ -16,7 +16,7 @@ api_version: core/v2
 metadata:
   name: sensu-go-fatigue-check-filter
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
   annotations:
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/nixwiz/sensu-go-fatigue-check-filter
     io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/nixwiz/sensu-go-fatigue-check-filter

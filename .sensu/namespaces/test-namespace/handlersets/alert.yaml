@@ -4,7 +4,7 @@ api_version: core/v2
 metadata:
   name: alert
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
 spec:
   handlers:
   - pushover

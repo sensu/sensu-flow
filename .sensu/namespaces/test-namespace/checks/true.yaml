@@ -3,7 +3,7 @@ api_version: core/v2
 metadata:
   name: test_true
   labels:
-    sensu.io/workflow: sensu_flow
+    sensu.io/workflow: sensu-flow
 spec:
   command: /usr/bin/true
   env_vars: null
