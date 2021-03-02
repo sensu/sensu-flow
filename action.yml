@@ -30,13 +30,17 @@ inputs:
     description: "Optional Sensu label to use in label selector, default: 'sensu.io/workflow'"
     required: false
   matching_condition:
-    description: "Optional Sensu label matching condition for label selector, default: '== sensu-flow'"
+    description: "Optional Sensu label matching condition for label selector, default: \"== 'sensu-flow\""
     required: false
   managed_resources:
     description: 'Optional comma seperated list of managed resources'
     required: false
+  disable_tls_verify:
+    description: 'Optional boolean argument to to disable tls cert verification  default: false'    
+    required: false
   disable_sanity_checks:
     description: 'Optional boolean argument to to disable sanity checks  default: false'    
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'

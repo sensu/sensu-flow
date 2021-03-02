@@ -251,6 +251,8 @@ Note: Namespaces are a cluster-level resource, so in order to use the namespaces
     description: Optional Sensu label matching condition, default: "== 'sensu-flow'"
 ####  managed_resources:
     description: Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"
+####  disable_tls_verify:
+    description: Optional boolean argument to to disable tls cert verification  default: false
 ####  disable_sanity_checks:
     description: Optional boolean argument to to disable sanity checks  default: false    
 
