@@ -1,0 +1,11 @@
+type: CheckConfig
+api_version: core/v2
+metadata:
+  name: empty_prune
+  labels:
+    sensu.io/workflow: sensu-flow 
+spec:
+  command: echo "empty prune check"
+  publish: false
+  subscriptions:
+  - linux
