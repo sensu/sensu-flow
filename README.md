@@ -236,23 +236,23 @@ Note: Namespaces are a cluster-level resource, so in order to use the namespaces
 
 ### Optional settings
 ####  configure_args:
-    description: "optional arguments to pass to sensuctl configure"
+    description: optional arguments to pass to sensuctl configure
 ####  sensu_ca_string:
-    description: 'Optional Custom CA pem string. Use this if you want to encode the CA pem as a github secret'
+    description: Optional Custom CA pem string. Use this if you want to encode the CA pem as a github secret
 ####  sensu_ca_file:
-    description: 'Optional Custom CA file location, this will override sensu_ca_string if used'
+    description: Optional Custom CA file location, this will override sensu_ca_string if used
 ####  namespaces_dir:
-    description: "Optional directory to process default: '.sensu/namespaces' "
+    description: Optional directory to process default: ".sensu/namespaces"
 ####  namespaces_file:
-    description: "Optional YAML file containing Sensu namespace resources to create default '.sensu/cluster/namespaces.yml'"
+    description: Optional YAML file containing Sensu namespace resources to create default ".sensu/cluster/namespaces.yml"
 ####  matching_label:
-    description: "Optional Sensu label selector, default: 'sensu.io/workflow'"
+    description: Optional Sensu label selector, default: "sensu.io/workflow"
 ####  matching_condition:
-    description: "Optional Sensu label matching condition, default: '== sensu-flow'"
+    description: Optional Sensu label matching condition, default: "== 'sensu-flow'"
 ####  managed_resources:
-    description: 'Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig""'
+    description: Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"
 ####  disable_sanity_checks:
-    description: 'Optional boolean argument to to disable sanity checks  default: false'    
+    description: Optional boolean argument to to disable sanity checks  default: false    
 
 
 ## Adapting to Other CI/CD Workflows
