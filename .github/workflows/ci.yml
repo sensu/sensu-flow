@@ -57,7 +57,7 @@ jobs:
 
     - name: prune Sensuflow matching label with dashes
       uses: ./
-      id: matching-label-with-dash
+      id: prune-matching-label-with-dash
       with:
         sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
