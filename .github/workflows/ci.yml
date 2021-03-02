@@ -62,7 +62,7 @@ jobs:
         sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
-        namespaces_dir: .sensu.test.prune/namespaces/
-        namespaces_file: .sensu.test.prune/cluster/namespaces.yaml
+        namespaces_dir: .sensu.prune.test/namespaces/
+        namespaces_file: .sensu.prune.test/cluster/namespaces.yaml
         matching_label: "sensu.io/workflow"
         matching_condition: "== 'sensu-flow'"
