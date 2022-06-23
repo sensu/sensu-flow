@@ -10,6 +10,7 @@
 ## Required Environment Variables
 # SENSU_USER: sensu user for sensuctl configure
 # SENSU_PASSWORD: sensu password for sensuctl configure
+# SENSU_API_KEY: sensu api key for sensuctl, used instead of user and password above
 # SENSU_BACKEND_URL: sensu backend for sensuctl configure
 ## Optional Environment Variables
 # SENSU_CA: CA certificate as a string
@@ -43,6 +44,7 @@ fi
 : ${VERBOSE:=${INPUT_VERBOSE:=""}}
 : ${SENSU_USER:=${INPUT_SENSU_USER}}
 : ${SENSU_PASSWORD:=${INPUT_SENSU_PASSWORD}}
+: ${SENSU_API_KEY:=${INPUT_SENSU_API_KEY}}
 : ${SENSU_BACKEND_URL:=${INPUT_SENSU_BACKEND_URL}}
 : ${CONFIGURE_ARGS:=${INPUT_CONFIGURE_ARGS}}
 : ${SENSU_CA_STRING:=${INPUT_SENSU_CA_STRING}}
@@ -51,8 +53,11 @@ fi
 if [[ $VERBOSE ]]; then echo "Working Directory: $PWD"; fi
 # Check for required envvars to be defined
 preflight_check=0
-[ -z "$SENSU_USER" ] && echo "SENSU_USER environment variable empty" && preflight_check=1
-[ -z "$SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
+if [ -z "$SENSU_API_KEY" ]; then
+  [ -z "$SENSU_USER" ] && echo "SENSU_USER environment variable empty" && preflight_check=1
+  [ -z "$SENSU_PASSWORD" ] && echo "SENSU_PASSWORD environment variable empty" && preflight_check=1
+  [ $preflight_check -ne 0 ] && echo "Either SENSU_API_KEY or SENSU_USER and SENSU_PASSWORD needs to be specified" && preflight_check=1
+fi
 [ -z "$SENSU_BACKEND_URL" ] && echo "SENSU_BACKEND_URL environment variable empty" && preflight_check=1
 [ -z "$MATCHING_LABEL" ] && echo "MATCHING_LABEL environment variable empty" && preflight_check=1
 [ -z "$MATCHING_CONDITION" ] && echo "MATCHING_CONDITION environment variable empty" && preflight_check=1
@@ -98,12 +103,15 @@ if [ $status -lt 200 ] || [ $status -ge 400 ]; then
 	echo "Probe of "$SENSU_BACKEND_URL/health" returned status code: $status"
 	exit 1
 fi
-if [[ $VERBOSE ]]; then echo "Checking Sensu auth credentials"; fi
-status=$(${curl_command} --connect-timeout 30 -k -o /dev/null -s -w "%{http_code}" -X GET "${SENSU_BACKEND_URL}/auth/test" -u "${SENSU_USER}:${SENSU_PASSWORD}")
-if [ $status -lt 200 ] || [ $status -ge 400 ]; then
-	echo "Sensu auth failed"
-	echo "Probe of "$SENSU_BACKEND_URL/auth/test" returned status code: $status"
-	exit 1
+
+if [ -z "$SENSU_API_KEY" ]; then # Skip auth test if API KEY is specified
+  if [[ $VERBOSE ]]; then echo "Checking Sensu auth credentials"; fi
+  status=$(${curl_command} --connect-timeout 30 -k -o /dev/null -s -w "%{http_code}" -X GET "${SENSU_BACKEND_URL}/auth/test" -u "${SENSU_USER}:${SENSU_PASSWORD}")
+  if [ $status -lt 200 ] || [ $status -ge 400 ]; then
+    echo "Sensu auth failed"
+    echo "Probe of "$SENSU_BACKEND_URL/auth/test" returned status code: $status"
+    exit 1
+  fi
 fi
 
 if [ "$DISABLE_SANITY_CHECKS" = "false" ]; then
@@ -116,14 +124,19 @@ else
 fi
 
 
-if [[ $VERBOSE ]]; then echo "Configuring sensuctl:"; fi
-sensuctl configure -n --username ${SENSU_USER} --password ${SENSU_PASSWORD} --url ${SENSU_BACKEND_URL} ${CA_ARG}  ${CONFIGURE_OPTIONS}
-retval=$?
-sensuctl config view
-if test $retval -ne 0; then
-	echo "sensuctl configure failed"
-	exit $retval
+if [ -z "$SENSU_API_KEY" ]; then # Disable sensuctl configure if API KEY is specified, use environment
+  if [[ $VERBOSE ]]; then echo "Configuring sensuctl:"; fi
+  sensuctl configure -n --username ${SENSU_USER} --password ${SENSU_PASSWORD} --url ${SENSU_BACKEND_URL} ${CA_ARG}  ${CONFIGURE_OPTIONS}
+  retval=$?
+  sensuctl config view
+  if test $retval -ne 0; then
+    echo "sensuctl configure failed"
+    exit $retval
+  fi
+else
+  export SENSU_API_URL="$SENSU_BACKEND_URL"
 fi
+
 if [[ $VERBOSE ]]; then
 	echo "Current Directory:"
 	pwd
