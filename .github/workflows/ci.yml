@@ -15,27 +15,23 @@ jobs:
   sensuflow:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    services:
-      sensu-backend:
-        image: sensu/sensu:latest
-        ports:
-          - 8080:8080
-        volumes:
-          - ${{ github.workspace }}:/checkout/
-        options: >-
-          --entrypoint /checkout/ci/entrypoint.sh
-              
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout
       uses: actions/checkout@v2
-
+    # Run a locally available sensu-backend service from a docker container
+    - uses: addnab/docker-run-action@v3
+      with:
+        image: sensu/sensu:latest
+        run: 
+        options: -p 8080:8080 -v ${{ github.workspace }}:/work/ --entrypoint /work/ci/entrypoint.sh
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
       with:
-        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://localhost:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         disable_sanity_checks: true
@@ -44,7 +40,7 @@ jobs:
       uses: ./
       id: options
       with:
-        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://localhost:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: ci-namespaces
@@ -56,7 +52,7 @@ jobs:
       uses: ./
       id: matching-label-with-dash
       with:
-        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://localhost:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.test/namespaces/
@@ -68,7 +64,7 @@ jobs:
       uses: ./
       id: prune-matching-label-with-dash
       with:
-        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://localhost:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.prune.test/namespaces/
