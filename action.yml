@@ -2,15 +2,12 @@
 name: 'SensuFlow'
 description: 'Manage Sensu resources using sensuctl prune and create commands'
 inputs:
-  sensu_backend_url:
-    description: 'The Sensu backend url (alt use env SENSU_BACKEND_URL)'
+  sensu_api_url:
+    description: 'The Sensu API url (alt use env SENSU_API_URL)'
     required: true
-  sensu_user:
-    description: 'The Sensu user to auth (alt use env SENSU_USER)'
-    required: true
-  sensu_password:
-    description: 'The Sensu user password (alt use env SENSU_PASSWORD)'
-    required: true
+  sensu_api_key:
+    description: 'The Sensu API key (alt use env SENSU_API_KEY)'
+    required: false
   configure_args:
     description: "Optional arguments to pass to sensuctl configure"
     required: false
@@ -40,6 +37,12 @@ inputs:
     required: false
   disable_sanity_checks:
     description: 'Optional boolean argument to to disable sanity checks  default: false'    
+    required: false
+  sensu_user:
+    description: 'DEPRECATED: The Sensu user to auth (alt use env SENSU_USER)'
+    required: false
+  sensu_password:
+    description: 'DEPRECATED: The Sensu user password (alt use env SENSU_PASSWORD)'
     required: false
 runs:
   using: 'docker'

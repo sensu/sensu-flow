@@ -7,6 +7,15 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- refactored envar/option names to match existing sensuctl envvars
+
+### Added
+- support for api_key based auth
+
+### Deprecated
+- user/pass auth is now deprecated in favor of api_key based auth
+
 ## [0.5.0] - 2021-03-01
 
 ### Breaking Chnages
