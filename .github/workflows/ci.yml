@@ -26,7 +26,7 @@ jobs:
       uses: ./
       id: defaults
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         disable_sanity_checks: true
@@ -35,7 +35,7 @@ jobs:
       uses: ./
       id: options
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: ci-namespaces
@@ -47,7 +47,7 @@ jobs:
       uses: ./
       id: matching-label-with-dash
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.test/namespaces/
@@ -59,7 +59,7 @@ jobs:
       uses: ./
       id: prune-matching-label-with-dash
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: ${{ secrets.SENSU_BACKEND_URL }}
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.prune.test/namespaces/
