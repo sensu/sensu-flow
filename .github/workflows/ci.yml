@@ -21,7 +21,7 @@ jobs:
         ports:
           - 8080:8080
         volumes:
-          - ${{ env.GITHUB_WORKSPACE }}:/checkout/
+          - ${{ github.workspace }}:/checkout/
         options: >-
           --entrypoint /checkout/ci/entrypoint.sh
               
