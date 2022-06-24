@@ -67,13 +67,21 @@ jobs:
       run: echo "The api key is ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}"
 
 
-    - name: Sensuflow with defaults and no sanity checking
+    - name: Sensuflow with defaults and no sanity checking using user/pass
       uses: ./
       id: defaults
       with:
         sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        disable_sanity_checks: true
+
+    - name: Sensuflow with defaults and no sanity checking using api key
+      uses: ./
+      id: defaults
+      with:
+        sensu_api_url: http://sensu-backend:8080
+        sensu_api_key: ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}
         disable_sanity_checks: true
 
     - name: Sensuflow with optional settings
