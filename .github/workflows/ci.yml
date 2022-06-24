@@ -58,6 +58,15 @@ jobs:
       run: docker ps
     - name: docker logs
       run: docker logs sensu-backend
+    - name: sensuctl configure
+      run: sensuctl configure --username  ${{ secrets.SENSU_USER }} --password  ${{ secrets.SENSU_PASSWORD }} -n
+    - name: grant api key
+      run: echo "::set-output name=SENSU_API_KEY::basename $(sensuctl api-key grant ${{ secrets.SENSU_USER }} | awk -F ':' '{print $2}')"
+      id: grant-api-key
+    - name: check api key
+      run: echo "SENSU_API_KEY: ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}"
+
+
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
