@@ -21,6 +21,8 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout
       uses: actions/checkout@v2
+    - name: setup-docker
+      uses: docker-practice/actions-setup-docker@v1
     # Run a locally available sensu-backend service from a docker container
     - name: Run local sensu-backend
       run: >-
