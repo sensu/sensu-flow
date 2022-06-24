@@ -26,6 +26,7 @@ jobs:
       with:
         image: sensu/sensu:latest
         options: >-
+          -d
           -p 8080:8080 
           -v ${{ github.workspace }}:/work/ 
           -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
