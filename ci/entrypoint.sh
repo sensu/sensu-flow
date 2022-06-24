@@ -47,4 +47,4 @@ elif [ $called = "sensu-backend" ]; then
     backend_init &
 fi
 
-${called_path} $@
+sensu-backend start
