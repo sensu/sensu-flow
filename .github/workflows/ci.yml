@@ -50,6 +50,7 @@ jobs:
         --network ${{ job.container.network }}  
         -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
         -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
+        -e SENSU_BACKEND_CLUSTER_ADMIN_API_KEY=${{ secrets.SENSU_API_KEY }}
         sensu/sensu:latest
         sensu-backend start
     - name: wait for sensu-backend
@@ -58,13 +59,6 @@ jobs:
       run: docker ps
     - name: docker logs
       run: docker logs sensu-backend
-    - name: sensuctl configure
-      run: docker exec sensu-backend sensuctl configure --api-url http://localhost:8080 --username  ${{ secrets.SENSU_USER }} --password  ${{ secrets.SENSU_PASSWORD }} -n
-    - name: grant api key
-      run: echo "::set-output name=SENSU_API_KEY::$(basename $(docker exec sensu-backend sensuctl api-key grant ${{ secrets.SENSU_USER }} | awk -F ':' '{print $2}'))"
-      id: grant-api-key
-    - name: check api key
-      run: echo "The api key is ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}"
 
 
     - name: Sensuflow with defaults and no sanity checking using user/pass
@@ -81,7 +75,7 @@ jobs:
       id: defaults-with-apikey
       with:
         sensu_api_url: http://sensu-backend:8080
-        sensu_api_key: ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}
+        sensu_api_key: ${{ secrets.SENSU_API_KEY }}
         disable_sanity_checks: true
 
     - name: Sensuflow with optional settings
