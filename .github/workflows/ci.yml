@@ -28,6 +28,7 @@ jobs:
         ca-certificates 
         curl 
         gnupg 
+        net-tools
         lsb-release
     - name: get docker gpg
       run: >-
@@ -45,17 +46,20 @@ jobs:
         docker run 
         -d
         -v ${{ github.workspace }}:/work/
+        --name sensu-backend
         --network ${{ job.container.network }}  
         -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
         -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
         sensu/sensu:latest
         sensu-backend start
-    - name: Wait for local backend
-      uses: iFaxity/wait-on-action@v1
-      with:
-        resource:  http://localhost:8080/health
-        delay: 1000
-        timeout: 20000
+    - name: wait
+      run: sleep 10    
+    - name: docker ps
+      run: docker ps
+    - name: docker logs
+      run: docker logs sensu-backend
+    - name: netstat
+      run: netstat -tlpn
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
