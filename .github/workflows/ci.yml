@@ -15,7 +15,7 @@ jobs:
   sensuflow:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    container: ubuntu
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -26,9 +26,7 @@ jobs:
       run: >-
         docker run 
         -d
-        -p 8080:8080 
         -v ${{ github.workspace }}:/work/
-        --name sensu-backend
         --network ${{ job.container.network }}  
         -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
         -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
