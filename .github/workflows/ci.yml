@@ -25,8 +25,8 @@ jobs:
     - uses: addnab/docker-run-action@v3
       with:
         image: sensu/sensu:latest
-        run: 
-        options: -p 8080:8080 -v ${{ github.workspace }}:/work/ --entrypoint /work/ci/entrypoint.sh
+        options: -p 8080:8080 -v ${{ github.workspace }}:/work/ 
+        shell: /work/ci/entrypoint.sh
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
