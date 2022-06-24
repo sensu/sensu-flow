@@ -52,14 +52,16 @@ jobs:
         -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
         sensu/sensu:latest
         sensu-backend start
-    - name: wait
-      run: sleep 10    
+    - name: wait for sensu-backend
+      uses: ifaxity/wait-on-action@v1
+      with:
+        resource: http://sensu-backend:8080/health
+        delay: 2000
+        timeout: 10000
     - name: docker ps
       run: docker ps
     - name: docker logs
       run: docker logs sensu-backend
-    - name: netstat
-      run: netstat -tlpn
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
