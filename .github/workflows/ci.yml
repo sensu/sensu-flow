@@ -36,6 +36,7 @@ jobs:
       uses: ifaxity/wait-on-action
       with:
         resource:  http://localhost:8080/health
+        delay: 1000
         timeout: 10000
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
