@@ -64,8 +64,7 @@ jobs:
       run: echo "::set-output name=SENSU_API_KEY::$(basename $(docker exec sensu-backend sensuctl api-key grant ${{ secrets.SENSU_USER }} | awk -F ':' '{print $2}'))"
       id: grant-api-key
     - name: check api key
-      run:  echo "test" 
-      #echo "SENSU_API_KEY: ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}"
+      run:  echo "SENSU_API_KEY: ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}"
 
 
     - name: Sensuflow with defaults and no sanity checking
