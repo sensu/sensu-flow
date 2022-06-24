@@ -48,6 +48,8 @@ jobs:
         -v ${{ github.workspace }}:/work/
         --name sensu-backend
         --network ${{ job.container.network }}  
+        -p 8080:8080
+        -p 8081:8081
         -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
         -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
         sensu/sensu:latest
