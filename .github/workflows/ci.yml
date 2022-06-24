@@ -69,7 +69,7 @@ jobs:
 
     - name: Sensuflow with defaults and no sanity checking using user/pass
       uses: ./
-      id: defaults
+      id: defaults-with-userpass
       with:
         sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
@@ -78,7 +78,7 @@ jobs:
 
     - name: Sensuflow with defaults and no sanity checking using api key
       uses: ./
-      id: defaults
+      id: defaults-with-apikey
       with:
         sensu_api_url: http://sensu-backend:8080
         sensu_api_key: ${{ steps.grant-api-key.outputs.SENSU_API_KEY }}
