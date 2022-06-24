@@ -59,7 +59,7 @@ jobs:
     - name: docker logs
       run: docker logs sensu-backend
     - name: sensuctl configure
-      run: docker exec sensu-backend sensuctl configure --username  ${{ secrets.SENSU_USER }} --password  ${{ secrets.SENSU_PASSWORD }} -n
+      run: docker exec sensu-backend sensuctl configure --api-url http://localhost:8080 --username  ${{ secrets.SENSU_USER }} --password  ${{ secrets.SENSU_PASSWORD }} -n
     - name: grant api key
       run: echo "::set-output name=SENSU_API_KEY::$(basename $(docker exec sensu-backend sensuctl api-key grant ${{ secrets.SENSU_USER }} | awk -F ':' '{print $2}'))"
       id: grant-api-key
