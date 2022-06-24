@@ -53,11 +53,7 @@ jobs:
         sensu/sensu:latest
         sensu-backend start
     - name: wait for sensu-backend
-      uses: ifaxity/wait-on-action@v1
-      with:
-        resource: http://sensu-backend:8080/health
-        delay: 2000
-        timeout: 10000
+      run: curl --head -X GET --retry 10 --retry-connrefused --retry-delay 2 http://sensu-backend:8080/health
     - name: docker ps
       run: docker ps
     - name: docker logs
