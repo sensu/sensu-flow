@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v2
     - name: prep apt
       run: >-
-        apt update && apt install -y curl sudo gpg
+        apt update && apt install -y curl sudo gpg lsb-release
     - name: setup-docker
       uses: docker-practice/actions-setup-docker@master
     # Run a locally available sensu-backend service from a docker container
