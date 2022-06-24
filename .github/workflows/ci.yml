@@ -22,7 +22,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: setup-docker
-      uses: docker-practice/actions-setup-docker@v1
+      uses: docker-practice/actions-setup-docker@master
     # Run a locally available sensu-backend service from a docker container
     - name: Run local sensu-backend
       run: >-
