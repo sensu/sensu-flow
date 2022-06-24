@@ -32,6 +32,11 @@ jobs:
           -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
           -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
         shell: /work/ci/entrypoint.sh
+    - name: Wait for local backend
+      uses: ifaxity/wait-on-action
+      with:
+        resource:  http://localhost:8080/health
+        timeout: 10000
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
