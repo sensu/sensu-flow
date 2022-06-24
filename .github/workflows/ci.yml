@@ -45,11 +45,9 @@ jobs:
       run: >-
         docker run 
         -d
-        -v ${{ github.workspace }}:/work/
         --name sensu-backend
+        --hostname sensu-backend 
         --network ${{ job.container.network }}  
-        -p 8080:8080
-        -p 8081:8081
         -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
         -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
         sensu/sensu:latest
@@ -66,7 +64,7 @@ jobs:
       uses: ./
       id: defaults
       with:
-        sensu_api_url: http://localhost:8080
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         disable_sanity_checks: true
@@ -75,7 +73,7 @@ jobs:
       uses: ./
       id: options
       with:
-        sensu_api_url: http://localhost:8080
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: ci-namespaces
@@ -87,7 +85,7 @@ jobs:
       uses: ./
       id: matching-label-with-dash
       with:
-        sensu_api_url: http://localhost:8080
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.test/namespaces/
@@ -99,7 +97,7 @@ jobs:
       uses: ./
       id: prune-matching-label-with-dash
       with:
-        sensu_api_url: http://localhost:8080
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.prune.test/namespaces/
