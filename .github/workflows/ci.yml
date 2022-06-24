@@ -38,7 +38,7 @@ jobs:
         | tee /etc/apt/sources.list.d/docker.list > /dev/null
     - name: install docker
       run: >-
-        DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io
+        DEBIAN_FRONTEND=noninteractive apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
     # Run a locally available sensu-backend service from a docker container
     - name: Run local sensu-backend using docker
       run: >-
