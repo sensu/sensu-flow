@@ -22,22 +22,24 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     # Run a locally available sensu-backend service from a docker container
-    - uses: addnab/docker-run-action@v3
-      with:
-        image: sensu/sensu:latest
-        options: >-
-          -d
-          -p 8080:8080 
-          -v ${{ github.workspace }}:/work/ 
-          -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
-          -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
-        shell: /work/ci/entrypoint.sh
+    - name: Run local sensu-backend
+      run: >-
+        docker run 
+        -d
+        -p 8080:8080 
+        -v ${{ github.workspace }}:/work/
+        --name sensu-backend
+        --network ${{ job.container.network }}  
+        -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
+        -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
+        sensu/sensu:latest
+        sensu-backend start
     - name: Wait for local backend
       uses: iFaxity/wait-on-action@v1
       with:
         resource:  http://localhost:8080/health
         delay: 1000
-        timeout: 10000
+        timeout: 20000
     - name: Sensuflow with defaults and no sanity checking
       uses: ./
       id: defaults
