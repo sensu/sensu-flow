@@ -75,11 +75,10 @@ $ sensuctl user create sensu-flow \
 In order to make use of this GitHub Action you will need to use it as part of a GitHub Action workflow YAML definition. GitHub Action workflow definitions are placed in `.github/workflows/` in your repository and must exist in the default branch. Please see the GitHub Action documentation for specifics.
 
 
-The action requires 3 configuration options to be defined:
+The action requires 2 configuration options to be defined:
 ```
-sensu_backend_url
-sensu_user
-sensu_password
+sensu_api_url
+sensu_api_key
 ```
 All other configuration options are considered optional.
 
@@ -111,13 +110,12 @@ jobs:
 
     # Step 2: use the versioned sensu/sensuflow action 
     - name: Sensuflow with required settings
-      uses: sensu/sensu-flow@0.5.0
+      uses: sensu/sensu-flow@0.6.0
       with:
         # Required configuration
         # Please make use of GitHub secrets for sensitive information 
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
-        sensu_user: ${{ secrets.SENSU_USER }}
-        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        sensu_api_url: ${{ secrets.SENSU_API_URL }}
+        sensu_api_key: ${{ secrets.SENSU_API_KEY }}
         # Optional configuration, if not present defaults will be used
         namespaces_dir: .sensu/namespaces
         namespaces_file: .sensu/cluster/namespaces.yaml
@@ -227,12 +225,17 @@ Note: Namespaces are a cluster-level resource, so in order to use the namespaces
 
 ## Configuration
 ### Required settings
-#### sensu_backend_url 
-  The Sensu backend url
-#### sensu_user 
+#### sensu_api_url 
+  The Sensu API url, same as `sensuctl` uses ( ex: `https://sensu.example.com:8080` )
+### Authentication settings
+#### sensu_api_key
+  A [Sensu API key](https://docs.sensu.io/sensu-go/latest/operations/control-access/use-apikeys/#sensuctl-management-commands)
+_OR_
+#### sensu_user (deprecated) 
   The Sensu user to auth 
-#### sensu_password
+#### sensu_password (deprecated)
   The Sensu user password
+
 
 ### Optional settings
 ####  configure_args:
