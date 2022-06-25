@@ -15,27 +15,74 @@ jobs:
   sensuflow:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    container: ubuntu
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout
       uses: actions/checkout@v2
+    - name: prep apt
+      run: >-
+        apt update && apt install -y
+        apt-transport-https 
+        ca-certificates 
+        curl 
+        gnupg 
+        net-tools
+        lsb-release
+    - name: get docker gpg
+      run: >-
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    - name: setup docker apt source
+      run: >-
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" 
+        | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - name: install docker
+      run: >-
+        DEBIAN_FRONTEND=noninteractive apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    # Run a locally available sensu-backend service from a docker container
+    - name: Run local sensu-backend using docker
+      run: >-
+        docker run 
+        -d
+        --name sensu-backend
+        --hostname sensu-backend 
+        --network ${{ job.container.network }}  
+        -e SENSU_BACKEND_CLUSTER_ADMIN_USERNAME=${{ secrets.SENSU_USER }} 
+        -e SENSU_BACKEND_CLUSTER_ADMIN_PASSWORD=${{ secrets.SENSU_PASSWORD }}
+        -e SENSU_BACKEND_CLUSTER_ADMIN_API_KEY=${{ secrets.SENSU_API_KEY }}
+        sensu/sensu:latest
+        sensu-backend start
+    - name: wait for sensu-backend
+      run: curl --head -X GET --retry 10 --retry-connrefused --retry-delay 2 http://sensu-backend:8080/health
+    - name: docker ps
+      run: docker ps
+    - name: docker logs
+      run: docker logs sensu-backend
 
-    - name: Sensuflow with defaults and no sanity checking
+
+    - name: Sensuflow with defaults and no sanity checking using user/pass
       uses: ./
-      id: defaults
+      id: defaults-with-userpass
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        disable_sanity_checks: true
+
+    - name: Sensuflow with defaults and no sanity checking using api key
+      uses: ./
+      id: defaults-with-apikey
+      with:
+        sensu_api_url: http://sensu-backend:8080
+        sensu_api_key: ${{ secrets.SENSU_API_KEY }}
         disable_sanity_checks: true
 
     - name: Sensuflow with optional settings
       uses: ./
       id: options
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: ci-namespaces
@@ -47,7 +94,7 @@ jobs:
       uses: ./
       id: matching-label-with-dash
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.test/namespaces/
@@ -59,7 +106,7 @@ jobs:
       uses: ./
       id: prune-matching-label-with-dash
       with:
-        sensu_backend_url: ${{ secrets.SENSU_BACKEND_URL }}
+        sensu_api_url: http://sensu-backend:8080
         sensu_user: ${{ secrets.SENSU_USER }}
         sensu_password: ${{ secrets.SENSU_PASSWORD }} 
         namespaces_dir: .sensu.prune.test/namespaces/
