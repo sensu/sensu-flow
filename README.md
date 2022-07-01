@@ -260,8 +260,8 @@ _OR_
     description: Optional boolean argument to to disable sanity checks  default: false    
 
 
-## Using the `sensu/sensuflow` Docker container image with CI/CD Workflows
-While this is originally developed and tested for use with GitHub Actions, there is a vendor neutral Docker container image `sensu/sensuflow` now available as of version `0.6.0` that should be suitable for use with any CI/CD tool chain that is capable of using container images for CI/CD jobs. Here's a list of contributed instructions for alternative CI/CD vendors: 
+## Using the Docker container image with other CI/CD tools
+While this is originally developed and tested for use with GitHub Actions, there is a vendor neutral `sensu/sensuflow` [Docker](https://hub.docker.com/repository/docker/sensu/sensu-flow) container image `sensu/sensuflow` now available as of version `0.6.0` that should be suitable for use with any CI/CD tool chain that is capable of using container images for CI/CD jobs. Here's a list of contributed instructions for alternative CI/CD vendors: 
 
 
 * [GitLab](docs/GITLAB.md)
