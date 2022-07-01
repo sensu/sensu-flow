@@ -7,7 +7,7 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.6.0] - 2022-06-23
+## [0.6.0] - 2022-07-01
 ### Changed
 - refactored envar/option names to match existing sensuctl envvars
 
