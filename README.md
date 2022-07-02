@@ -108,7 +108,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # Step 2: use the versioned sensu/sensuflow action 
+    # Step 2: use the versioned sensu/sensu-flow action 
     - name: Sensuflow with required settings
       uses: sensu/sensu-flow@0.6.0
       with:
@@ -260,9 +260,14 @@ _OR_
     description: Optional boolean argument to to disable sanity checks  default: false    
 
 
-## Adapting to Other CI/CD Workflows
-If you would like to adapt this for other CI/CD workflows, take a look at the sensuflow.sh script from this repositorory. The script should be self-documenting with regard to needed executable dependancies and information concerning environment variables used.
+## Using the Docker container image with other CI/CD tools
+While this is originally developed and tested for use with GitHub Actions, there is a vendor neutral `sensu/sensu-flow` [Docker](https://hub.docker.com/repository/docker/sensu/sensu-flow) container image available as of version `0.6.0` that should be suitable for use with any CI/CD tool chain that is capable of using container images for CI/CD jobs. Here's a list of contributed instructions for alternative CI/CD vendors: 
 
+
+* [GitLab](docs/GITLAB.md)
+
+Contributed instructions for additional CI/CD services are welcome.
+ 
 ## Goals 
 
 SensuFlow is under active development, so please don't hesitate to submit issues for any enhancements you'd like to see. 

@@ -8,10 +8,8 @@
 # jq: https://stedolan.github.io/jq/
 #
 ## Required Environment Variables
-# SENSU_USER: sensu user for sensuctl configure
-# SENSU_PASSWORD: sensu password for sensuctl configure
-# SENSU_API_KEY: sensu api key for sensuctl, used instead of user and password above
 # SENSU_API_URL: sensu backend api url used by sensuctl
+# SENSU_API_KEY: sensu api key for sensuctl, used instead of user and password above
 ## Optional Environment Variables
 # SENSU_CA: CA certificate as a string
 # SENSU_CA_FILE: CA certificate file, if set overrides SENSU_CA
@@ -23,6 +21,9 @@
 # MATCHING_CONDITION: condition to match
 # DISABLE_SANITY_CHECKS: if set disable sanity checks
 # DISABLE_TLS_VERIFY: if set disable TLS verification 
+## Deprecated Authentication Environment Variables
+# SENSU_USER: sensu user for sensuctl configue (deprecated, use SENSU_API_KEY)
+# SENSU_PASSWORD: sensu password for sensuctl configure (deprecated, use SENSU_API_KEY)
 
 ## GitHub Action Notes
 # GitHub Actions prefaces variables with INPUT_
