@@ -263,7 +263,7 @@ _OR_
 ## Using the Docker container image with other CI/CD tools
 While this is originally developed and tested for use with GitHub Actions, there is a vendor neutral `sensu/sensu-flow` [Docker](https://hub.docker.com/repository/docker/sensu/sensu-flow) container image available as of version `0.6.0` that should be suitable for use with any CI/CD tool chain that is capable of using container images for CI/CD jobs. Here's a list of contributed instructions for alternative CI/CD vendors: 
 
-
+* [Bitbucket](docs/BITBUCKET.md)
 * [GitLab](docs/GITLAB.md)
 
 Contributed instructions for additional CI/CD services are welcome.
