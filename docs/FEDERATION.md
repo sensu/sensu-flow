@@ -1,4 +1,4 @@
-# Using sensu-flow with a Sensu Federatied Cluster
+# Using sensu-flow with a Sensu Federated Cluster
 
 ## Intro
 Federation is a commercial feature in the official release of the sensu-backend binary that lets you configure a gateway cluster to act as a command & control node for other Sensu clusters.
