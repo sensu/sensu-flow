@@ -1,17 +1,136 @@
-# SensuFlow GitHub Action
-The GitHub Action for SensuFlow, a git-based approach to managing Sensu resources.
+# SensuFlow
 
-## Introduction
-This GitHub Action will allow you to manage Sensu resources for multiple Sensu namespaces as part of GitHub-facilitated CI/CD workflows.
- 
-In order to use this action, you'll first need to define a Sensu user and associated role-based access control. A reference RBAC policy and user definition matching the Action's default settings is provided below as a reference. 
+SensuFlow is a prescriptive monitoring as code workflow that uses the Sensu Go API and sensuctl commands to synchronize Sensu resources for multiple Sensu namespaces as part of a CI/CD system.
+Specifically, SensuFlow executes [`sensuctl create`][19] and [`sensuctl prune`][20] commands.
+Use SensuFlow to ensure that updates to the Sensu resources in your repository are reflected in your Sensu configuration.
 
+SensuFlow is implemented as a Bash shell script, `sensuflow.sh`, that executes sensuctl commands in a Docker container.
+SensuFlow includes linting logic to ensure your Sensu resource definitions are self-consistent with respect to your namespace directory structure and label-matching rule.
 
-## How It Works
-This Action provides an opinionated best practises to using the `sensuctl create` and `sensuctl prune` commands in order to efficiently manage Sensu monitoring resources in one or more namespaces. The Action automates several resource linting actions to help ensure self-consistent monitoring resources are defined prior to updating any Sensu resources.
+## Requirements
 
-This is achieved by processing a directory structure where each subdirectory is mapped to a Sensu namespace.
-By default, the required directory structure looks like:
+The SensuFlow script requires these executables:
+
+- [jq][10]
+- [yq][11]
+- [sensuctl][12] (configured to communicate with the Sensu backend that you want to use SensuFlow with)
+
+To use SensuFlow, you'll also need:
+
+- A Sensu role-based access control (RBAC) [service account][13] with sufficient privileges to manage your monitoring configuration as code.
+- A [resource labeling][14] convention to designate which resources should be managed by SensuFlow.
+- A repository that contains Sensu monitoring code, organized in the correct [directory structure][15].
+- An integrated CI/CD system to run sensuctl commands using the Sensu service account from your Sensu monitoring code repository.
+
+A vendor-neutral `sensu/sensu-flow` [Docker container image][1] is available as of version `0.6.0`.
+You can use the Docker container image in your local development environment or adapt it to use with any CI/CD service that can use container images for CI/CD jobs.
+More information is available for the following CI/CD services: 
+
+- [Bitbucket][4]
+- [GitHub][5]
+- [GitLab][6]
+
+## Install SensuFlow
+
+**TODO**
+
+## Service account
+
+This section explains how to create a service account for use with SensuFlow.
+The commands in this section will create an example service account with a [cluster role][16], [cluster role binding][17], and [user][18].
+You can use this example service account with the default SensuFlow settings.
+
+**NOTE**: Run these commands in an environment where sensuctl is already configured to communicate with the Sensu backend that SensuFlow should work with.
+
+1. Create the sensu-flow cluster role, which defines the resource permissions the sensu-flow service account will need:
+
+```
+sensuctl cluster-role create sensu-flow \
+--resource namespaces,roles,rolebindings,assets,handlers,checks,hooks,filters,mutators,secrets \
+--verb get,list,create,update,delete
+```
+
+2. Create the sensu-flow cluster role binding, which connects the cluster role to a group of users:
+
+```
+sensuctl cluster-role-binding create sensu-flow \
+--cluster-role sensu-flow \
+--group sensu-flow
+```
+
+3. Create the sensu-flow user.
+A Sensu user and password is required to authenticate with the Sensu API.
+Make sure the user is a member of the `sensu-flow` group.
+
+    To create the user interactively:
+```
+sensuctl user create --interactive
+? Username: sensu-flow
+? Password: <your_password>
+? Groups: sensu-flow
+```
+
+    To create the user non-interactively:
+```
+sensuctl user create sensu-flow \
+--password <your_password> \
+--groups sensu-flow
+```
+
+**NOTE**: The example service account grants the sensu-flow user access to a subset of Sensu resources, cluster-wide.
+You may prefer to use a more restrictive RBAC policy to meet your security requirements.
+Read [Create limited service accounts][7] and the [Role based access control][8] reference for more information.
+
+### API key for the sensu-flow user
+
+The sensu-flow user must have an API key to authenticate to the Sensu APIs required to use SensuFlow.
+
+To generate an API key, in your environment where `sensuctl` is configured, run `sensuctl api-key grant sensu-flow`.
+The response will include a string like `/api/core/v2/apikeys/4b044eea-9937-4e83-b263-2f6cd0431e9c`.
+The last part of the string, in this case `4b044eea-9937-4e83-b263-2f6cd0431e9c`, is the API key.
+
+If you encounter an error, make sure that you have created a `sensu-flow` [service account][13] user.
+
+## Resource labeling
+
+To determine which Sensu resources to act upon, SensuFlow compares the settings for MATCHING_LABEL, MATCHING_CONDITION, and MANAGED_RESOURCES against each resource definition.
+For SensuFlow to act on a resource, all of the following must be true:
+
+- The resource includes the label specified as the MATCHING_LABEL value.
+- The resource's value for the label evaluates to true according to the specified MATCHING_CONDITION.
+- The resource type is listed among the specified MANAGED_RESOURCES.
+
+For example, suppose you set the following SensuFlow environment variables:
+
+- MATCHING_LABEL="sensu.io/workflow"
+- MATCHING_CONDITION="== 'sensu-flow'"
+- MANAGED_RESOURCES="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"
+
+In this case, a Sensu check resource with the label `sensu.io/workflow: sensu-flow` matches all three requirements for processing with SensuFlow.
+A check with the label `sensu.io/workflow: monitoring-as-code` does not match.
+Nor does an entity, even if it includes the `sensu.io/workflow: sensu-flow` label.
+
+### Labeling tips
+
+Resource labeling is a key decision point in implementing SensuFlow because `sensuctl prune` and the prune API rely on labels to determine which resources to delete if they are no longer in your code repository.
+This affects **all** of your Sensu resources, not just the resources in your repository.
+If unmanaged resources (resources that are not managed as code) include the label that SensuFlow uses, the unmanaged resources may be deleted as part of the SensuFlow workflow.
+
+Make sure all of the Sensu resources you want to manage with SensuFlow include the label and value specified in the MATCHING_LABEL and MATCHING_CONDITION environment variables.
+Be consistent with Sensu resource labeling throughout your organization to prevent the spread of unmanaged resources or accidental deletion.
+
+Do not include a namespace in your resource definitions.
+Namespaced resources will conflict with sensuctl’s global namespace argument taken from the SensuFlow directory structure.
+
+## Directory structure
+
+SensuFlow uses a prescribed directory structure that is organized by clusters and namespaces, mapping subdirectory names to Sensu namespaces to process.
+All resources of each type for each namespace are saved in a single configuration file.
+
+A prescribed directory structure helps preserve maintainability and readability and makes it easier for teams to collaborate and reuse Sensu observability pipeline solutions originally developed by other teams.
+
+The default directory structure is:
+
 ```
 .sensu/
   cluster/
@@ -23,179 +142,16 @@ By default, the required directory structure looks like:
       filters/
       handlers/
       handelersets/
-      mutators/
-  
-```
-where `<namespace>` is a placeholder for each Sensu namespace under management. The `cluster/` directory can be used to optionally manage Sensu cluster-wide resources, such as namespaces, if the Sensu RBAC profile in use allows for cluster-wide resource management.
-  
-## Setup
-
-### Configure the Sensu RBAC Profile
-Below are instructions to create an RBAC profile that can be used with this Action with the default settings. This profile makes use of Sensu CluserRole and ClusterRoleBindings to grant the Action user access to a subset of Sensu resources cluster-wide. You may want to use a more restrictive RBAC policy to meet your security requirements.
-
-You will need to run these commands in an environment where sensuctl is pre-configured to communicate with the Sensu backend you want SensuFlow to work with.
-
-#### Create the sensu-flow ClusterRole
-The Sensu ClusterRole defines the resource permissions the GitHub resource will need.
-```
-$ sensuctl cluster-role create sensu-flow \
-  --resource namespaces,roles,rolebindings,assets,handlers,checks,hooks,filters,mutators,secrets \
-  --verb get,list,create,update,delete
+      mutators/  
 ```
 
-#### Create the sensu-flow ClusterRoleBinding
-The Sensu ClusterRoleBinding connects the ClusterRole to a group of users.
-```
-$ sensuctl cluster-role-binding create sensu-flow \
-  --cluster-role sensu-flow \
-  --group sensu-flow
-```
+In this structure, `<namespace>` is a placeholder for each Sensu namespace under management.
 
-#### Create the sensu-flow User
-A Sensu user and password is needed to authenticate with the Sensu API. Make sure the user is a member of the `sensu-flow` group.
+By default, the processed directory is `.sensu/namespaces/`, but you can change this in your SensuFlow configuration.
+Within the specified directory, each subdirectory will be processed as a separate Sensu namespace.
 
-Create the user interactively:
-```
-$ sensuctl user create --interactive
-? Username: sensu-flow
-? Password: *********
-? Groups: sensu-flow
-Created
-```
+The following example shows how to organize Sensu resource files within the default directory structure:
 
-or, create the user non-interactively:
-```
-$ sensuctl user create sensu-flow \
-  --password REPLACEME \
-  --groups sensu-flow
-
-```
-
-### Configure the SensuFlow GitHub Action
-In order to make use of this GitHub Action you will need to use it as part of a GitHub Action workflow YAML definition. GitHub Action workflow definitions are placed in `.github/workflows/` in your repository and must exist in the default branch. Please see the GitHub Action documentation for specifics.
-
-
-The action requires 2 configuration options to be defined:
-```
-sensu_api_url
-sensu_api_key
-```
-All other configuration options are considered optional.
-
-You will also want to consider using GitHub secrets for sensitive information used in the Action configuration. At a minimum, you will want to consider using GitHub secrets for the `sensu_user` and `sensu_password`.
-
-### Verifying Configuration
-Below is a working example that will run the SensuFlow GitHub Action when pushing to main branch or when a main branch pull-request is created.
-
-#### GitHub Action Workflow Example
-Save as `.github/workflows/sensu-flow.yaml` and commit to main branch. After activating the workflow in the GitHub UX, this Action should run for any commits into main.
-
-```
-name: SensuFlow CI Example
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  # Defined the SensuFlow job 
-  SensuFlow:
-    runs-on: ubuntu-latest
-    steps:
-    # Step 1: Checks-out your repository, so your job can access it
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # Step 2: use the versioned sensu/sensu-flow action 
-    - name: Sensuflow with required settings
-      uses: sensu/sensu-flow@0.6.0
-      with:
-        # Required configuration
-        # Please make use of GitHub secrets for sensitive information 
-        sensu_api_url: ${{ secrets.SENSU_API_URL }}
-        sensu_api_key: ${{ secrets.SENSU_API_KEY }}
-        # Optional configuration, if not present defaults will be used
-        namespaces_dir: .sensu/namespaces
-        namespaces_file: .sensu/cluster/namespaces.yaml
-        matching_label: "sensu.io/workflow"
-        matching_condition: "== 'sensu-flow'"
-
-```
-### Your First SensuFlow Workflow
-Now that the action is activated and configured to run on any push into the main branch, you can test it.
-
-#### Create a Test Namespace
-Edit the file `.sensu/cluster/namespaces.yaml` in your git repository and define a Sensu namespace resource for a new testing namespace.
-```
----
-type: Namespace
-api_version: core/v2
-spec:
-  name: test-namespace
-```
-
-### Create Corresponding Namespace Directory
-```
-mkdir -p .sensu/namespaces/test-namespace
-touch .sensu/namespaces/.keep
-``` 
-
-The SensuFlow GitHub Action will process the `test-namespace` directory, using resource definitions found within as a source of truth for the state of the corresponding Sensu namespace. The `.keep` file just tells git to keep the directory structure as part of the repository even if there are no files defined in it.  
-
-### Create Initial Resources in test-namespace
-mkdir `.sensu/namespaces/test-namespace/checks`
-edit the file `.sensu/namespaces/test-namespace/checks/hello_world.yaml`
-```
-type: CheckConfig
-api_version: core/v2
-metadata:
-  name: hello_world
-  labels:
-    sensu.io/workflow: sensu-flow
-spec:
-  command: echo "hello world"
-  interval: 30
-  publish: false
-  subscriptions:
-  - test
-  timeout: 10
-```
-
-mkdir `.sensu/namespaces/test-namespace/handlers`
-edit the file `.sensu/namespaces/test-namespace/handlers/test.yaml`
-```
-type: Handler
-api_version: core/v2
-metadata:
-  name: test
-  labels:
-    sensu.io/workflow: sensu-flow
-spec:
-  command: sleep 10
-  type: pipe
-```
-
-### Commit and Push Changes
-Once these files are in place, you can commit and push the changes back to GitHub. The SensuFlow GitHub Action should trigger and run to completion.
-You can then verify using sensuctl in your administrative environment that the test-namespace exists.
-```
-sensuctl namespace list
-```
-and that the namespace contains the hello-world check and the test handler
-```
-sensuctl --namespace test-namespace check list
-sensuctl --namespace test-namespace handler list
-```
-### Delete the Check From the Git Repository
-Now delete the `hello_world.yaml` file and commit the change again. The SensuFlow GitHub Action will use `sensuctl prune` to remove the check and you should be able to verify that the check no longer exists in the test-namespace.
-
-
-## GitHub Action Configuration Reference
-
-### Namespace Resource Management
-This action uses a special directory structure, mapping subdirectory names to Sensu namespaces to process. By default the directory processed is `.sensu/namespaces/` but this can be overridden in the Action configuration. If this directory exists, each subdirectory will be processed as a separate Sensu namespace. Example directory structure:
 ```
 .sensu
 └── namespaces
@@ -207,80 +163,104 @@ This action uses a special directory structure, mapping subdirectory names to Se
         │   └── true.yaml
         ├── filters
         │   └── fatigue-check.yaml
-        ├── handlersets
-        │   └── alert.yaml
         ├── handlers
         │   ├── aws-sns.yaml
         │   └── pushover.yaml
+        ├── handlersets
+        │   └── alert.yaml
+        └── mutators
+            └── check-status.yaml
+    └── production-namespace
+        ├── checks
+        │   ├── check-cpu.yaml
+        │   ├── check-http.yaml
+        │   ├── false.yaml
+        │   └── true.yaml
+        ├── filters
+        │   └── fatigue-check.yaml
+        ├── handlers
+        │   ├── aws-sns.yaml
+        │   └── pushover.yaml
+        ├── handlersets
+        │   └── alert.yaml
         └── mutators
             └── check-status.yaml
 ```
 
-Using this example, this Action would process the `test-namespace`, pruning the namespace resources according to `matching_label`, `matching_condition`,  and `managed_resources`settings
+You can use the `cluster/` directory to manage Sensu cluster-wide resources, such as namespaces, if the Sensu RBAC profile in use allows for cluster-wide resource management.
 
-### Optionally Preparing Namespaces
-If the namespaces file (default: `.sensu/cluster/namespaces.yaml`) exists and is populated with Sensu namespace resource definitions, then this Action will be used to create the Sensu namespace resources defined in the file before attempting to process the namespaces directory. 
+### Option: Create namespaces
 
-Note: Namespaces are a cluster-level resource, so in order to use the namespaces creation capability the Sensu user will need cluser-level role-based access to create namespaces.  
+If your code repository includes a namespaces file (default `.sensu/cluster/namespaces.yaml`) that is populated with Sensu namespace resource definitions, SensuFlow will create the Sensu namespace resources defined in the file before attempting to process the `.sensu/namespaces/` directory. 
+
+**NOTE**: Namespaces are a cluster-level resource.
+To create namespaces with SensuFlow, the Sensu [service account][13] user will need cluster-level role-based access to create namespaces.
 
 ## Configuration
-### Required settings
-#### sensu_api_url 
-  The Sensu API url, same as `sensuctl` uses ( ex: `https://sensu.example.com:8080` )
-### Authentication settings
-#### sensu_api_key
-  A [Sensu API key](https://docs.sensu.io/sensu-go/latest/operations/control-access/use-apikeys/#sensuctl-management-commands)
-_OR_
-#### sensu_user (deprecated) 
-  The Sensu user to auth 
-#### sensu_password (deprecated)
-  The Sensu user password
 
+SensuFlow uses environment variables to customize how the script interacts with your environment.
+The minimum required variables for SensuFlow are SENSU_API_KEY and SENSU_API_URL.
+All other environment variables are optional settings that allow you to customize the SensuFlow experience.
 
-### Optional settings
-####  configure_args:
-    description: optional arguments to pass to sensuctl configure
-####  sensu_ca_string:
-    description: Optional Custom CA pem string. Use this if you want to encode the CA pem as a github secret
-####  sensu_ca_file:
-    description: Optional Custom CA file location, this will override sensu_ca_string if used
-####  namespaces_dir:
-    description: Optional directory to process default: ".sensu/namespaces"
-####  namespaces_file:
-    description: Optional YAML file containing Sensu namespace resources to create default ".sensu/cluster/namespaces.yml"
-####  matching_label:
-    description: Optional Sensu label selector, default: "sensu.io/workflow"
-####  matching_condition:
-    description: Optional Sensu label matching condition, default: "== 'sensu-flow'"
-####  managed_resources:
-    description: Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"
-####  disable_tls_verify:
-    description: Optional boolean argument to to disable tls cert verification  default: false
-####  disable_sanity_checks:
-    description: Optional boolean argument to to disable sanity checks  default: false    
+Environment variable  | Type     | Required or Optional | Description
+--------------------- | -------- | -------------------- | -----------
+CONFIGURE_OPTIONS     | String   | Optional             | Additional options for the `sensuctl configure` command.
+DISABLE_SANITY_CHECKS | Boolean  | Optional             | If `true`, disable checks that ensure resource definitions are self-consistent. Otherwise, `false`. Default is `false`.
+DISABLE_TLS_VERIFY    | Boolean  | Optional             | If `true`, disable TLS certificate verification. Otherwise, `false`. Default is `false`.
+MANAGED_RESOURCES     | String   | Optional             | Comma-separated list of resource types that SensuFlow manages. Default is `"checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"`.
+MATCHING_CONDITION    | String   | Optional             | Condition statement for a Sensu resource label match. Default is `"== 'sensu-flow'"`.
+MATCHING_LABEL        | String   | Optional             | Sensu resource label to match. Default is `"sensu.io/workflow"`.
+NAMESPACES_DIR        | String   | Optional             | Directory that SensuFlow should process. Default is `".sensu/namespaces"`.
+NAMESPACES_FILE       | String   | Optional             | Location of YAML file that contains Sensu namespace resources that SensuFlow should create. Default is `".sensu/cluster/namespaces.yml"`.
+SENSU_API_KEY         | String   | Required             | Sensu [API key][9].
+SENSU_API_URL         | String   | Required             | Sensu backend API URL (the URL used to configure `sensuctl`, such as `https://sensu.example.com:8080`).
+SENSU_CA              | String   | Optional             | Certificate Authority (CA) file as a string. Use the SENSU_CA variable if you want to encode the CA file as a GitHub Actions secret.
+SENSU_CA_FILE         | String   | Optional             | Certificate Authority (CA) file location. The SENSU_CA_FILE value (if provided) overrides the SENSU_CA value.
+VERBOSE               | Integer  | Optional             | If set, shows verbose description of actions carried out by the script. 
 
+There are also two deprecated environment variables:
 
-## Using the Docker container image with other CI/CD tools
-While this is originally developed and tested for use with GitHub Actions, there is a vendor neutral `sensu/sensu-flow` [Docker](https://hub.docker.com/repository/docker/sensu/sensu-flow) container image available as of version `0.6.0` that should be suitable for use with any CI/CD tool chain that is capable of using container images for CI/CD jobs. Here's a list of contributed instructions for alternative CI/CD vendors: 
+- SENSU_PASSWORD (string): The Sensu user password.
+- SENSU_USER (string): The Sensu user to authenticate.
 
-* [Bitbucket](docs/BITBUCKET.md)
-* [GitLab](docs/GITLAB.md)
+The SENSU_API_KEY environment variable replaces the SENSU_PASSWORD and SENSU_USER variables.
 
-Contributed instructions for additional CI/CD services are welcome.
- 
-## Goals 
+### Set environment variables
 
-SensuFlow is under active development, so please don't hesitate to submit issues for any enhancements you'd like to see. 
+**TODO**
 
-The main improvements we're currently focused on at the time of this writing (H1'21) are as follows: 
+## Development goals 
+
+SensuFlow is under active development, so please submit issues for any enhancements you'd like to see. 
+
+Here are the needed improvements we've identified so far: 
 
 - Improved pre-flight tests (test Sensu endpoint liveness, verify authentication credentials, etc.)
 - Improved linting (label enforcement, type validation, etc.)
-- Validate integrity of assets (optionally fetch all configured assets, verify SHA512 values)
-- Reference testing (if a check/handler refers to assets and/or secrets, are the asset/secret resource definitions also present?)
+- Validate integrity of assets (optionally fetch all configured assets; verify SHA512 values)
+- Reference testing (if a check/handler refers to assets/secrets, confirm whether the asset/secret resource definitions are also present)
 
-For more information, please view the SensuFlow project [issues][issues] and [milestones][milestones]. 
+For more information, read the SensuFlow project [issues][2] and [milestones][3].
+We also welcome contributed instructions for additional CI/CD services.
 
-[issues]: https://github.com/sensu/sensu-flow/issues 
-[milestones]: https://github.com/sensu/sensu-flow/milestones
 
+[1]: https://hub.docker.com/repository/docker/sensu/sensu-flow
+[2]: https://github.com/sensu/sensu-flow/issues 
+[3]: https://github.com/sensu/sensu-flow/milestones
+[4]: docs/BITBUCKET.md
+[5]: docs/GITHUB.md
+[6]: docs/GITLAB.md
+[7]: https://docs.sensu.io/sensu-go/latest/operations/control-access/create-limited-service-accounts/
+[8]: https://docs.sensu.io/sensu-go/latest/operations/control-access/rbac/
+[9]: https://docs.sensu.io/sensu-go/latest/operations/control-access/use-apikeys/#sensuctl-management-commands
+[10]: https://stedolan.github.io/jq/
+[11]: https://github.com/mikefarah/yq
+[12]: https://sensu.io/downloads
+[13]: #service-account
+[14]: #resource-labeling
+[15]: #directory-structure
+[16]: https://docs.sensu.io/sensu-go/latest/operations/control-access/rbac/#cluster-roles
+[17]: https://docs.sensu.io/sensu-go/latest/operations/control-access/rbac/#cluster-role-bindings
+[18]: https://docs.sensu.io/sensu-go/latest/operations/control-access/rbac/#users
+[19]: https://docs.sensu.io/sensu-go/latest/sensuctl/create-manage-resources/#create-resources
+[20]: https://docs.sensu.io/sensu-go/latest/sensuctl/create-manage-resources/#prune-resources

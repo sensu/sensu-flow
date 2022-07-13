@@ -1,41 +1,45 @@
 ## Bitbucket
-The `sensu/sensu-flow` [Docker container image](https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#define-image-in-the-gitlab-ciyml-file) can be used with Bitbucket pipelines. The `sensuflow.sh` script within this container was originally developed for GitHub actions, but will execute successfully if provided the correct environment variables.
+
+You can use the `sensu/sensu-flow` [Docker container image][2] with [Bitbucket pipelines][1].
 
 ### Authentication
 
-The `sensuflow.sh` script will look for a `SENSU_API_URL` and `SENSU_API_KEY` to use for authentication, and while it is possible to add these directly to your `bitbucket-pipelines.yml` file, we recommend using [Bitbucket repository variables](https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/) in order to keep your credentials from being tracked by git. 
+The `sensuflow.sh` script requires the SENSU_API_KEY and SENSU_API_URL [environment variables][4] for authentication.
 
-To set repository variables, from your repository's page on Bitbucket, click on "Repository settings" on the left-hand menu. From there, click on "Repository variables," also on the left-hand menu.
+The SENSU_API_KEY is the Sensu [API key for your sensu-flow service account user][6].
+The SENSU_API_URL is the Sensu backend URL used to configure sensuctl.
+For example, if your Sensu backend is hosted at `93.184.216.34` on port `8080`, the SENSU_API_URL is `http://93.184.216.34:8080`.
 
-On the resulting page, in the "Name" input bux, put `SENSU_API_URL`. Set the "Value" input box to be the API URL of your backend. For example, if your Sensu backend is hosted at `93.184.216.34` on port `8080`, you would set `SENSU_API_URL` to `http://93.184.216.34:8080`. Leave the "Secured" checkbox checked, and click the "Add" button.
+Although you can add the SENSU_API_KEY and SENSU_API_URL directly to your `bitbucket-pipelines.yml` file, we recommend using [Bitbucket repository variables][3] for sensitive information like authentication credentials.
 
-After that is done, you will add `SENSU_API_KEY` in the same way. To generate your API key, in an environment where you have `sensuctl` configured, run `sensuctl api-key grant sensu-flow`. This will output a string such as the following.
+To set Bitbucket repository variables:
 
-```
-/api/core/v2/apikeys/4b044eea-9937-4e83-b263-2f6cd0431e9c
-```
+1. On your repository's page on Bitbucket, use the left menu to navigate to **Repository settings > Repository variables**.
+Wait for the Repository variables page to load.
 
-The final part, `4b044eea-9937-4e83-b263-2f6cd0431e9c` is what you will set as the value of `SENSU_API_KEY`. If you encounter an error, make sure that a `sensu-flow` user has been created [as is specified](https://github.com/sensu/sensu-flow#create-the-sensu-flow-user) in this repository's main documentation.
+2. In the *Name* field, enter `SENSU_API_KEY`.
+
+3. In the *Value* field, enter the API key for your sensu-flow service account user.
+
+4. Ensure that the *Secured* checkbox is checked.
+
+5. Click **Add**.
+
+6. Repeat steps 1 through 5 for the SENSU_API_URL variable and value.
 
 ### Other Configuration Options
 
-The following environment variables are taken into account by `sensuflow.sh`. You can either set them using Bitbucket repository variables in the same way as described in the "Authentication" section above, or you can set them directly in your script by executing `export VARIABLE=VALUE`. For example, to set `VERBOSE` to `1`, you would add `export VERBOSE=1` to your pipeline script.
+In addition to the required environment variables, SensuFlow includes optional environment variables.
+You can set the optional environment variables with Bitbucket repository variables as described in [Authentication][7] or directly in your Bitbucket pipeline script.
 
-* `SENSU_CA` - CA certificate as a string.
-* `SENSU_CA_FILE` - CA certificate file, if set overrides `SENSU_CA`.
-* `CONFIGURE_OPTIONS` - Additional sensuctl configure options.
-* `NAMESPACES_DIR` - Directory holding sensuflow namepace subdirectories.
-* `NAMESPACES_FILE` - File holding namespace resource definitions sensuflow action should create.
-* `MANAGED_RESOURCES` - A comma seperated list of resources.
-* `MATCHING_LABEL` - A resource label to match.
-* `MATCHING_CONDITION` - Condition to match.
-* `DISABLE_SANITY_CHECKS` - If set sanity checks will be disabled.
-* `DISABLE_TLS_VERIFY` - If TLS verification will be disabled.
-* `VERBOSE` - If set shows verbose description of actions carried out by the script.
+To set environment variables in your Bitbucket pipeline script, add `export VARIABLE=VALUE`.
+For example, to set `VERBOSE` to `1`, add `export VERBOSE=1` to your pipeline script.
 
-### Example Pipeline
+### Example Bitbucket pipeline
 
-Create a file named `bitbucket-pipelines.yml` in the root folder of your project with the following contents, and edit it as needed. The example below is set to show verbose output, and to load the credentials necessary for authentication from Bitbucket repository variables. 
+Create a file named `bitbucket-pipelines.yml` in the root folder of your project with the following contents and edit as needed.
+This example shows verbose output and loads the credentials necessary for authentication from Bitbucket repository variables. 
+
 
 ```yaml
 image: sensu/sensu-flow:0.6.0
@@ -43,8 +47,18 @@ image: sensu/sensu-flow:0.6.0
 pipelines:
   default:
     - step:
-        name: 'Sensuflow with required settings'
+        name: 'SensuFlow with required settings'
         script:
           - "export VERBOSE=1"
           - "/sensuflow.sh"
 ```
+
+
+[1]: https://confluence.atlassian.com/bitbucket/use-docker-images-as-build-environments-in-bitbucket-pipelines-792298897.html
+[2]: https://hub.docker.com/repository/docker/sensu/sensu-flow
+[3]: https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
+[4]: ../#configuration
+[5]: ../#create-the-sensu-flow-user
+[6]: ../#api-key-for-the-sensu-flow-user
+[7]: #authentication
+[8]: ../#set-environment-variables
