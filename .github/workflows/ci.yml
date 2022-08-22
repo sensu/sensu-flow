@@ -87,7 +87,7 @@ jobs:
       with:
         sensu_api_url: http://sensu-backend:8080
         sensu_api_key: ${{ secrets.SENSU_API_KEY }}
-        disable_sanity_checks: true
+        disable_sanity_checks: false
 
     - name: Sensuflow with optional settings
       uses: ./
