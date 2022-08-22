@@ -106,8 +106,7 @@ jobs:
       id: matching-label-with-dash
       with:
         sensu_api_url: http://sensu-backend:8080
-        sensu_user: ${{ secrets.SENSU_USER }}
-        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        sensu_api_key: ${{ secrets.SENSU_API_KEY }}
         namespaces_dir: .sensu.test/namespaces/
         namespaces_file: .sensu.test/cluster/namespaces.yaml
         matching_label: "sensu.io/workflow"
@@ -118,8 +117,7 @@ jobs:
       id: prune-matching-label-with-dash
       with:
         sensu_api_url: http://sensu-backend:8080
-        sensu_user: ${{ secrets.SENSU_USER }}
-        sensu_password: ${{ secrets.SENSU_PASSWORD }} 
+        sensu_api_key: ${{ secrets.SENSU_API_KEY }}
         namespaces_dir: .sensu.prune.test/namespaces/
         namespaces_file: .sensu.prune.test/cluster/namespaces.yaml
         matching_label: "sensu.io/workflow"
