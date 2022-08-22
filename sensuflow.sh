@@ -113,6 +113,9 @@ if [ -z "$SENSU_API_KEY" ]; then # Skip auth test if API KEY is specified
     echo "Probe of "$SENSU_API_URL/auth/test" returned status code: $status"
     exit 1
   fi
+else 
+  export SENSU_API_KEY
+
 fi
 
 if [ "$DISABLE_SANITY_CHECKS" = "false" ]; then
@@ -156,6 +159,7 @@ function die {
 
 # Check if a namespace exists
 function is_namespace {
+  if [[ $VERBOSE ]]; then echo "checking to see if namespace exists on server"; fi
   QUERY=$(sensuctl namespace list --format json | jq  -r ".[] | select(.name==\"${1}\") | .name")
   test "${1}" = "${QUERY}"
   return $?
