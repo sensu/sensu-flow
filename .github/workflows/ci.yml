@@ -75,7 +75,7 @@ jobs:
 
     - name: Sensuflow with defaults and no sanity checking using api key
       uses: ./
-      id: defaults-with-apikey
+      id: defaults-no-sanity-checks-with-apikey
       with:
         sensu_api_url: http://sensu-backend:8080
         sensu_api_key: ${{ secrets.SENSU_API_KEY }}
