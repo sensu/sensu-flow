@@ -66,6 +66,7 @@ fi
 [ -z "$MATCHING_CONDITION" ] && echo "MATCHING_CONDITION environment variable empty" && preflight_check=1
 [ -z "$MANAGED_RESOURCES" ] && echo "MANAGED_RESOURCES environment variable empty" && preflight_check=1
 [ -z "$NAMESPACES_DIR" ]  && echo "NAMESPACES_DIR environment variable empty" && preflight_check=1
+[ -z "$RESOURCE_AUTHORS" ]  && echo "RESOURCE_AUTHORS environment variable empty" && preflight_check=1
 
 if test $preflight_check -ne 0 ; then
 	echo "Missing environment variables"
@@ -150,6 +151,7 @@ if [[ $VERBOSE ]]; then
 	echo "Matching Label: ${MATCHING_LABEL}"
 	echo "Matching Condition: ${MATCHING_CONDITION}"
 	echo "Label Selector: ${LABEL_SELECTOR}"
+	echo "Resource Authors: ${RESOURCE_AUTHORS}"
 fi
 # Functions
 
