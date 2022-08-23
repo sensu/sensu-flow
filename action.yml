@@ -32,6 +32,9 @@ inputs:
   managed_resources:
     description: 'Optional comma seperated list of managed resources'
     required: false
+  resource_authors:
+    description: 'Optional comma seperated list users to filter created_by metadata, defaults to sensu-flow'
+    required: false
   disable_tls_verify:
     description: 'Optional boolean argument to to disable tls cert verification  default: false'    
     required: false

@@ -21,6 +21,7 @@
 # MATCHING_CONDITION: condition to match
 # DISABLE_SANITY_CHECKS: if set disable sanity checks
 # DISABLE_TLS_VERIFY: if set disable TLS verification 
+# RESOURCE_AUTHORS: comma separated list of users to filter created_by (default to: sensu_flow)
 ## Deprecated Authentication Environment Variables
 # SENSU_USER: sensu user for sensuctl configue (deprecated, use SENSU_API_KEY)
 # SENSU_PASSWORD: sensu password for sensuctl configure (deprecated, use SENSU_API_KEY)
@@ -38,6 +39,7 @@ fi
 : ${MATCHING_LABEL:=${INPUT_MATCHING_LABEL:="sensu.io/workflow"}}
 : ${MATCHING_CONDITION:=${INPUT_MATCHING_CONDITION:="== 'sensu-flow'"}}
 : ${MANAGED_RESOURCES:=${INPUT_MANAGED_RESOURCES:="checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"}}
+: ${RESOURCE_AUTHORS:=${INPUT_RESOURCE_AUTHORS:="sensu-flow"}}
 : ${NAMESPACES_DIR:=${INPUT_NAMESPACES_DIR:=".sensu/namespaces"}}
 : ${NAMESPACES_FILE:=${INPUT_NAMESPACES_FILE:=".sensu/cluster/namespaces.yaml"}}
 : ${DISABLE_SANITY_CHECKS:=${INPUT_DISABLE_SANITY_CHECKS:="false"}}
@@ -252,7 +254,7 @@ do
 	  echo -e "sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector \"${LABEL_SELECTOR}\" -r -f ${namespace} | jq '. | length'"
   fi
 
-  num=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${LABEL_SELECTOR}" -r -f ${namespace} | jq '. | length')
+  num=$(sensuctl prune ${MANAGED_RESOURCES} --namespace ${namespace} --label-selector "${LABEL_SELECTOR}" -r -f ${namespace} --users ${RESOURCE_AUTHORS} | jq '. | length')
   retval=$?
   if test $retval -ne 0; then 
 	echo "Error during sensuctl prune!"
