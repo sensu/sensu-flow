@@ -254,6 +254,8 @@ _OR_
     description: Optional Sensu label matching condition, default: "== 'sensu-flow'"
 ####  managed_resources:
     description: Optional comma seperated list of managed resources, default: "checks,handlers,filters,mutators,assets,secrets/v1.Secret,roles,role-bindings,core/v2.HookConfig"
+####  resource_authors:
+    description: Optional comma seperated list of resource authors to filter created_by metadata, default: "sensu-flow"
 ####  disable_tls_verify:
     description: Optional boolean argument to to disable tls cert verification  default: false
 ####  disable_sanity_checks:
