@@ -7,6 +7,15 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2022-09-23
+### Added
+- new resource_authors option that lets you select which created_by values you will match. Defaults to sensu-flow
+- added contribured documentation for using docker image for alternative CI/CD workflows.
+
+### Changed
+- Fixed bug using api-key for auth.
+- Added additional verbose logging for troubleshooting.
+
 ## [0.6.0] - 2022-07-01
 ### Changed
 - refactored envar/option names to match existing sensuctl envvars

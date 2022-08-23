@@ -110,17 +110,26 @@ jobs:
 
     # Step 2: use the versioned sensu/sensu-flow action 
     - name: Sensuflow with required settings
-      uses: sensu/sensu-flow@0.6.0
+      uses: sensu/sensu-flow@0.7.0
       with:
+        ##
         # Required configuration
         # Please make use of GitHub secrets for sensitive information 
+        ##
         sensu_api_url: ${{ secrets.SENSU_API_URL }}
         sensu_api_key: ${{ secrets.SENSU_API_KEY }}
+        ##
         # Optional configuration, if not present defaults will be used
+        ##
         namespaces_dir: .sensu/namespaces
         namespaces_file: .sensu/cluster/namespaces.yaml
         matching_label: "sensu.io/workflow"
         matching_condition: "== 'sensu-flow'"
+        ##
+        # Only prune resources created_by these users, you'll want to make sure
+        # this list includes the user associated with the api-key used for authorization
+        ##
+        resource_authors: "sensu-flow"
 
 ```
 ### Your First SensuFlow Workflow
@@ -265,6 +274,7 @@ _OR_
 ## Using the Docker container image with other CI/CD tools
 While this is originally developed and tested for use with GitHub Actions, there is a vendor neutral `sensu/sensu-flow` [Docker](https://hub.docker.com/repository/docker/sensu/sensu-flow) container image available as of version `0.6.0` that should be suitable for use with any CI/CD tool chain that is capable of using container images for CI/CD jobs. Here's a list of contributed instructions for alternative CI/CD vendors: 
 
+* [Docker Image](docs/Docker.md)
 * [Bitbucket](docs/BITBUCKET.md)
 * [GitLab](docs/GITLAB.md)
 

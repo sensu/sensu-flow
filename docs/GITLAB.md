@@ -17,6 +17,7 @@ When using the docker image with GitLab, you'll need to be aware of several envi
 # MANAGED_RESOURCES: comma seperated list of resources
 # MATCHING_LABEL: resource label to match
 # MATCHING_CONDITION: condition to match
+# RESOURCE_AUTHORS: user names to match in the created_by metadata when pruning resources.
 # DISABLE_SANITY_CHECKS: if set disable sanity checks
 # DISABLE_TLS_VERIFY: if set disable TLS verification 
 ## Deprecated Authentication Environment Variables
