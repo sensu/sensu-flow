@@ -29,6 +29,7 @@ The following environment variables are taken into account by `sensuflow.sh`. Yo
 * `MANAGED_RESOURCES` - A comma seperated list of resources.
 * `MATCHING_LABEL` - A resource label to match.
 * `MATCHING_CONDITION` - Condition to match.
+* `RESOURCE_AUTHORS` - user names to match in the created_by metadata when pruning resources.
 * `DISABLE_SANITY_CHECKS` - If set sanity checks will be disabled.
 * `DISABLE_TLS_VERIFY` - If TLS verification will be disabled.
 * `VERBOSE` - If set shows verbose description of actions carried out by the script.
@@ -38,7 +39,7 @@ The following environment variables are taken into account by `sensuflow.sh`. Yo
 Create a file named `bitbucket-pipelines.yml` in the root folder of your project with the following contents, and edit it as needed. The example below is set to show verbose output, and to load the credentials necessary for authentication from Bitbucket repository variables. 
 
 ```yaml
-image: sensu/sensu-flow:0.6.0
+image: sensu/sensu-flow:0.7.0
 
 pipelines:
   default:
