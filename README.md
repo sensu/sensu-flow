@@ -22,8 +22,9 @@ By default, the required directory structure looks like:
       hooks/
       filters/
       handlers/
-      handelersets/
+      handlersets/
       mutators/
+      pipelines/
   
 ```
 where `<namespace>` is a placeholder for each Sensu namespace under management. The `cluster/` directory can be used to optionally manage Sensu cluster-wide resources, such as namespaces, if the Sensu RBAC profile in use allows for cluster-wide resource management.
